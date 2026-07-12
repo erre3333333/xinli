@@ -153,4 +153,10 @@ async function handleUpgrade(planId) {
   background: rgba(200, 150, 100, 0.08); color: #B89E82; border: none; cursor: default;
 }
 .pp-note { text-align: center; color: #B89E82; font-size: 12px; margin-top: 24px; }
+
+@media (max-width: 720px) {
+  .pp-grid { grid-template-columns: 1fr; max-width: 380px; margin: 0 auto; }
+  .pp-wrap { padding: 16px 12px 32px; }
+  .pp-card { padding: 20px; }
+}
 </style>

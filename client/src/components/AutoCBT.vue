@@ -348,4 +348,15 @@ function scrollToBottom() {
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+@media (max-width: 720px) {
+  .autocbt-container { padding: 0 0 12px; }
+  .autocbt-header { padding: 16px; }
+  .autocbt-header h2 { font-size: 18px; }
+  .autocbt-messages { padding: 8px 12px; }
+  .autocbt-input { padding: 8px 12px 12px; gap: 8px; }
+  .autocbt-input textarea { padding: 10px; font-size: 14px; }
+  .autocbt-input button { padding: 0 16px; font-size: 13px; }
+  .message-content { max-width: 92%; }
+}
 </style>

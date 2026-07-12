@@ -178,4 +178,15 @@ defineEmits(['speak', 'stop-speak'])
   opacity: 0;
   transform: translateY(6px);
 }
+
+@media (max-width: 720px) {
+  .scroll-view { padding: 14px 12px 8px; }
+  .scroll-inner { gap: 14px; }
+}
+@media (max-width: 480px) {
+  .scroll-view { padding: 10px 8px 6px; }
+  .scroll-inner { gap: 10px; }
+  .glass-divider { padding: 0; }
+  .gd-label { font-size: 10px; }
+}
 </style>

@@ -913,10 +913,22 @@ const bothDone = computed(() =>
   transform: translateX(20px);
 }
 
-@media (max-width: 600px) {
-  .diag-header { padding: 12px 14px; }
+@media (max-width: 720px) {
+  .diag-header { padding: 12px 14px; flex-wrap: wrap; gap: 8px; }
+  .diag-header h2 { font-size: 16px; }
+  .diag-header .dh-tabs { overflow-x: auto; }
   .diag-chat { padding: 12px 14px; }
   .review-grid { grid-template-columns: 1fr; }
   .result-card-body { padding: 14px 16px; }
+  .scale-card { padding: 16px; }
+  .scale-options { flex-wrap: wrap; gap: 6px; }
+  .scale-opt { padding: 6px 12px; font-size: 12px; }
+  .scale-question { padding: 14px 0; }
+}
+@media (max-width: 480px) {
+  .diag-container { padding: 0; }
+  .diag-messages { padding: 8px 10px; }
+  .diag-input-area { padding: 8px 10px 12px; }
+  .diag-input textarea { padding: 10px; font-size: 14px; min-height: 40px; }
 }
 </style>

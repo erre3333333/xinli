@@ -120,4 +120,14 @@ async function submit() {
   cursor: pointer; padding: 4px;
 }
 .af-link:hover { text-decoration: underline; }
+
+@media (max-width: 600px) {
+  .auth-page { padding: 12px; }
+  .auth-card { padding: 28px 20px; }
+  .auth-header h2 { font-size: 20px; }
+  .auth-header p { font-size: 13px; }
+  .auth-header { margin-bottom: 24px; }
+  .af-group input { padding: 10px 12px; }
+  .af-btn { padding: 10px; font-size: 14px; }
+}
 </style>

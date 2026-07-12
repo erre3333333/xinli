@@ -66,6 +66,8 @@ function goToProfile() {
 
 const { speak, stop: stopSpeak, hasSupport, hasChineseVoice } = useSpeech()
 
+const mobileMenuOpen = ref(false)
+
 const currentView = ref('conditions')
 const currentPatient = ref(null)
 const currentServiceType = ref(null)
@@ -116,6 +118,18 @@ function selectPatient(p) {
     handleSpeak(greeting)
   }
   currentView.value = 'chat'
+}
+
+function toggleMobileMenu() {
+  mobileMenuOpen.value = !mobileMenuOpen.value
+}
+
+function navigateMobile(view) {
+  mobileMenuOpen.value = false
+  showLogin.value = false
+  currentView.value = view
+  currentPatient.value = null
+  messages.value = []
 }
 
 function goToLanding() {
@@ -337,9 +351,89 @@ watch(
           <template v-else>
             <button class="bh-login-btn" @click="goToLogin">登录</button>
           </template>
+          <button class="bh-hamburger" @click="toggleMobileMenu" aria-label="菜单">
+            <span :class="['hamburger-line', { open: mobileMenuOpen }]"></span>
+          </button>
         </div>
       </div>
     </div>
+
+    <Transition name="drawer">
+      <div v-if="mobileMenuOpen" class="mobile-drawer-overlay" @click="toggleMobileMenu">
+        <div class="mobile-drawer" @click.stop>
+          <div class="md-header">
+            <span class="md-title">导航</span>
+            <button class="md-close" @click="toggleMobileMenu">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+            </button>
+          </div>
+          <div class="md-body">
+            <button
+              class="md-item"
+              :class="{ on: currentView === 'conditions' || currentView === 'chat' }"
+              @click="navigateMobile('conditions')"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+              <span>首页 · 咨询服务</span>
+            </button>
+            <button
+              class="md-item"
+              :class="{ on: currentView === 'autocbt' }"
+              @click="navigateMobile('autocbt')"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+              <span>AutoCBT</span>
+            </button>
+            <button
+              class="md-item"
+              :class="{ on: currentView === 'faye' }"
+              @click="navigateMobile('faye')"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+              <span>Faye 情绪调节</span>
+            </button>
+            <button
+              class="md-item"
+              :class="{ on: currentView === 'dashboard' }"
+              @click="navigateMobile('dashboard')"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M9 3H5a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2z"/><path d="M19 3h-4a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2z"/><path d="M9 15H5a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2z"/><path d="M19 15h-4a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2z"/></svg>
+              <span>量表中心</span>
+            </button>
+            <button
+              class="md-item"
+              :class="{ on: currentView === 'comprehensive' }"
+              @click="navigateMobile('comprehensive')"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+              <span>综合报告</span>
+            </button>
+            <button
+              class="md-item"
+              :class="{ on: currentView === 'diagnosis' }"
+              @click="navigateMobile('diagnosis')"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+              <span>AI 问诊</span>
+            </button>
+          </div>
+          <div class="md-footer">
+            <template v-if="user">
+              <button class="md-item" @click="mobileMenuOpen = false; goToProfile()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                <span>{{ user.name || '个人中心' }}</span>
+              </button>
+            </template>
+            <template v-else>
+              <button class="md-item" @click="mobileMenuOpen = false; goToLogin()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+                <span>登录</span>
+              </button>
+            </template>
+          </div>
+        </div>
+      </div>
+    </Transition>
     <div class="bili-subnav" v-if="currentView !== 'chat'">
       <button
         class="bs-tab"
@@ -943,9 +1037,156 @@ watch(
   opacity: 0;
 }
 
+/* —— Hamburger —— */
+.bh-hamburger {
+  display: none;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink-muted);
+  border: 1px solid var(--hairline);
+  cursor: pointer;
+  transition: all 0.2s var(--ease-out);
+  position: relative;
+}
+.bh-hamburger:hover {
+  color: var(--ink);
+  border-color: var(--ink-muted);
+}
+.hamburger-line,
+.hamburger-line::before,
+.hamburger-line::after {
+  display: block;
+  width: 16px;
+  height: 2px;
+  background: currentColor;
+  border-radius: 2px;
+  transition: all 0.25s var(--ease-out);
+  position: absolute;
+  left: 50%;
+  margin-left: -8px;
+}
+.hamburger-line { top: 50%; margin-top: -1px; }
+.hamburger-line::before { content: ''; top: -5px; }
+.hamburger-line::after { content: ''; top: 5px; }
+.hamburger-line.open { background: transparent; }
+.hamburger-line.open::before { top: 0; transform: rotate(45deg); }
+.hamburger-line.open::after { top: 0; transform: rotate(-45deg); }
+
+/* —— Mobile Drawer —— */
+.mobile-drawer-overlay {
+  position: fixed; inset: 0; z-index: 1000;
+  background: rgba(0,0,0,0.3);
+  display: flex;
+  justify-content: flex-end;
+}
+.mobile-drawer {
+  width: 280px; max-width: 85vw;
+  height: 100%;
+  background: linear-gradient(180deg, #FFF9F5, #FFFFFF);
+  display: flex;
+  flex-direction: column;
+  box-shadow: -4px 0 24px rgba(0,0,0,0.1);
+  animation: slide-in-right 0.25s var(--ease-out);
+}
+.md-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 20px 12px;
+  border-bottom: 1px solid rgba(200, 150, 100, 0.1);
+}
+.md-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--ink);
+}
+.md-close {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--ink-muted);
+  cursor: pointer;
+}
+.md-close:hover { background: var(--surface-hover); color: var(--ink); }
+.md-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.md-footer {
+  border-top: 1px solid rgba(200, 150, 100, 0.1);
+  padding: 12px 8px;
+}
+.md-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: var(--r-sm);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink-secondary);
+  cursor: pointer;
+  transition: all 0.15s var(--ease-out);
+  width: 100%;
+  text-align: left;
+  border: none;
+  background: none;
+}
+.md-item:hover {
+  background: var(--surface-hover);
+  color: var(--ink);
+}
+.md-item.on {
+  background: rgba(251, 114, 153, 0.08);
+  color: #E85D75;
+  font-weight: 600;
+}
+
+@keyframes slide-in-right {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+.drawer-enter-active,
+.drawer-leave-active {
+  transition: all 0.25s var(--ease-out);
+}
+.drawer-enter-from,
+.drawer-leave-to {
+  opacity: 0;
+}
+.drawer-enter-from .mobile-drawer,
+.drawer-leave-to .mobile-drawer {
+  transform: translateX(100%);
+}
+
+/* —— Mobile Responsive —— */
+@media (max-width: 900px) {
+  .bh-center { display: none; }
+  .bh-hamburger { display: inline-flex; }
+  .bili-header-inner { padding: 0 12px; }
+  .bh-right { gap: 8px; }
+  .bili-subnav { display: none; }
+}
+
 @media (max-width: 720px) {
   .stage { padding: 0 10px 12px; }
-  .composer { padding: 10px 16px 12px; }
+  .composer { padding: 10px 12px 12px; }
   .panel { border-radius: var(--r-md); }
+  .bili-header-inner { height: 48px; }
+  .bh-logo { font-size: 14px; }
+}
+
+@media (max-width: 480px) {
+  .composer-bar { gap: 4px; padding: 2px; }
+  .composer-input-el :deep(.el-textarea__inner) { padding: 6px 10px; font-size: 13px; }
+  .composer-hint { font-size: 10px; }
 }
 </style>

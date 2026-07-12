@@ -574,4 +574,16 @@ function scrollToBottom() {
   color: #999;
   margin-top: 8px;
 }
+
+@media (max-width: 720px) {
+  .faye-container { padding: 0 0 12px; }
+  .faye-header { padding: 12px 14px; }
+  .faye-title h2 { font-size: 16px; }
+  .faye-messages { padding: 8px 12px; }
+  .input-area { padding: 8px 12px 12px; }
+  .stage-steps { gap: 4px; padding: 0 8px; }
+  .stage-step { min-width: 0; }
+  .stage-label { font-size: 9px; }
+  .stage-dot { width: 22px; height: 22px; font-size: 10px; }
+}
 </style>

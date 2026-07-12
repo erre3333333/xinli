@@ -266,4 +266,16 @@ function onSpeakClick() {
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+@media (max-width: 720px) {
+  .glass-bubble { max-width: 92%; }
+  .gb-body { padding: 10px 14px; font-size: 14px; }
+}
+@media (max-width: 480px) {
+  .glass-bubble { max-width: 95%; }
+  .gb-body { padding: 8px 12px; font-size: 13px; }
+  .gb-meta { gap: 4px; }
+  .gb-name { font-size: 11px; }
+  .gb-time { font-size: 9px; }
+}
 </style>

@@ -291,4 +291,15 @@ async function handleChangePassword() {
 }
 .pwd-submit:hover:not(:disabled) { opacity: 0.9; }
 .pwd-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+
+@media (max-width: 600px) {
+  .profile-page { padding: 16px; }
+  .profile-card { padding: 24px 20px; }
+  .pc-name { font-size: 18px; }
+  .pc-avatar { width: 60px; height: 60px; font-size: 24px; }
+  .detail-card { max-height: 90vh; }
+  .detail-hd { padding: 16px 20px 10px; }
+  .detail-body { padding: 10px 20px 20px; }
+  .pwd-card { padding: 24px 20px; }
+}
 </style>
