@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: xinli
+    runtime: node
+    repo: https://github.com/erre3333333/xinli
+    branch: main
+    rootDir: server
+    buildCommand: npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3001
+      - key: JWT_SECRET
+        value: xinli-jwt-2024
+      - key: AGNES_API_KEY
+        value: your-deepseek-api-key
