@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>心理健康咨询平台 - 系统架构图</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0e17;color:#c8d0e0;font-family:"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;overflow-x:hidden;padding:40px 20px}
+h1{text-align:center;font-size:24px;color:#fff;margin-bottom:8px;letter-spacing:2px}
+.subtitle{text-align:center;font-size:13px;color:#667;margin-bottom:40px}
+.arch-container{max-width:1400px;margin:0 auto;position:relative}
+.layer{margin-bottom:32px;position:relative}
+.layer-label{position:absolute;left:-10px;top:50%;transform:rotate(-90deg) translateX(-50%);font-size:11px;color:#556;letter-spacing:3px;text-transform:uppercase;white-space:nowrap;transform-origin:left center}
+.layer-box{border:1px solid #1e2538;border-radius:12px;padding:24px 20px 20px;background:rgba(15,20,35,0.6);position:relative}
+.layer-box::before{content:'';position:absolute;inset:-1px;border-radius:12px;padding:1px;background:linear-gradient(135deg,var(--accent)30%,transparent 50%);-webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none}
+.layer-title{font-size:13px;color:var(--accent);margin-bottom:16px;font-weight:600;letter-spacing:1px;display:flex;align-items:center;gap:8px}
+.layer-title::before{content:'';width:3px;height:14px;background:var(--accent);border-radius:2px}
+.components{display:flex;flex-wrap:wrap;gap:12px;position:relative}
+.comp{background:#111827;border:1px solid #1e2a3a;border-radius:8px;padding:12px 16px;min-width:160px;flex:1;position:relative;transition:all .2s;cursor:default}
+.comp:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 4px 20px rgba(0,0,0,.3)}
+.comp-title{font-size:13px;color:#e0e8f0;font-weight:600;margin-bottom:4px}
+.comp-desc{font-size:11px;color:#667;line-height:1.4}
+.comp-badge{display:inline-block;font-size:10px;padding:2px 6px;border-radius:3px;background:var(--accent)15;color:var(--accent);margin-top:6px}
+/* Connection lines between layers */
+.connections{position:relative;height:40px;margin:0 auto;max-width:1200px}
+.conn-line{position:absolute;left:50%;width:1px;height:100%;background:linear-gradient(to bottom,var(--from),var(--to));opacity:.3}
+.conn-line::after{content:'';position:absolute;bottom:0;left:-3px;width:7px;height:7px;border-right:1px solid var(--to);border-bottom:1px solid var(--to);transform:rotate(45deg)}
+/* Row with connectors */
+.comp-row{display:flex;gap:12px;margin-bottom:12px;position:relative}
+.comp-row::after{content:'';position:absolute;bottom:-20px;left:50%;right:50%;height:20px;border-left:1px dashed #1e2a3a;border-right:1px dashed #1e2a3a}
+.comp-row:last-child::after{display:none}
+/* Specific layer accents */
+.layer-client{--accent:#4a9eff}
+.layer-server{--accent:#34d399}
+.layer-graph{--accent:#a78bfa}
+.layer-data{--accent:#f59e0b}
+.layer-infra{--accent:#94a3b8}
+/* Arrow connectors */
+.arrow-down{display:flex;justify-content:center;margin:8px 0;position:relative;height:24px}
+.arrow-down::before{content:'';position:absolute;top:0;left:50%;width:1px;height:100%;background:#2a3548;transform:translateX(-50%)}
+.arrow-down::after{content:'';position:absolute;bottom:0;left:50%;width:7px;height:7px;border-left:1px solid #2a3548;border-bottom:1px solid #2a3548;transform:translateX(-50%) rotate(45deg)}
+/* Grid background */
+body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(circle,#1a2035 1px,transparent 1px);background-size:30px 30px;opacity:.3;pointer-events:none;z-index:-1}
+/* Legend */
+.legend{display:flex;justify-content:center;gap:24px;margin-top:40px;padding:16px;background:rgba(15,20,35,.6);border:1px solid #1e2538;border-radius:8px;flex-wrap:wrap}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:11px;color:#889}
+.legend-dot{width:8px;height:8px;border-radius:50%}
+/* Detail panel */
+.detail-panel{max-width:1400px;margin:40px auto 0;background:rgba(15,20,35,.8);border:1px solid #1e2538;border-radius:12px;padding:24px}
+.detail-panel h3{font-size:14px;color:#8899aa;margin-bottom:16px;letter-spacing:1px}
+.detail-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+.detail-card{background:#111827;border:1px solid #1e2a3a;border-radius:8px;padding:16px}
+.detail-card h4{font-size:13px;color:#e0e8f0;margin-bottom:8px}
+.detail-card ul{list-style:none;padding:0}
+.detail-card li{font-size:11px;color:#667;padding:2px 0;padding-left:12px;position:relative}
+.detail-card li::before{content:'›';position:absolute;left:0;color:#4a5568}
+@media(max-width:768px){.components{flex-direction:column}.comp{min-width:auto}}
+</style>
+</head>
+<body>
+<h1>心理健康咨询平台 · 系统架构</h1>
+<p class="subtitle">Vue 3 + Express.js + LangGraph + Agnes AI LLM</p>
+
+<div class="arch-container">
+
+<!-- CLIENT LAYER -->
+<div class="layer layer-client">
+<div class="layer-label">CLIENT LAYER</div>
+<div class="layer-box">
+<div class="layer-title">前端层</div>
+<div class="components">
+<div class="comp" style="--accent:#4a9eff">
+<div class="comp-title">Vue 3 SPA</div>
+<div class="comp-desc">Vite 构建，单页应用</div>
+<div class="comp-badge">client/</div>
+</div>
+<div class="comp" style="--accent:#4a9eff">
+<div class="comp-title">组件系统</div>
+<div class="comp-desc">components/ composables/ utils/</div>
+</div>
+<div class="comp" style="--accent:#4a9eff">
+<div class="comp-title">配置中心</div>
+<div class="comp-desc">config/ 量表配置、API端点</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="arrow-down"></div>
+
+<!-- SERVER LAYER -->
+<div class="layer layer-server">
+<div class="layer-label">SERVER LAYER</div>
+<div class="layer-box">
+<div class="layer-title">Express.js 后端</div>
+<div class="components">
+<div class="comp" style="--accent:#34d399">
+<div class="comp-title">Express Server</div>
+<div class="comp-desc">端口 3001，CORS + JSON 解析</div>
+<div class="comp-badge">server/src/index.js</div>
+</div>
+<div class="comp" style="--accent:#4a9eff">
+<div class="comp-title">Chat Route</div>
+<div class="comp-desc">流式对话 / 用药建议</div>
+<div class="comp-badge">POST /api/chat</div>
+</div>
+<div class="comp" style="--accent:#4a9eff">
+<div class="comp-title">Assess Route</div>
+<div class="comp-desc">单量表分析报告</div>
+<div class="comp-badge">POST /api/assess</div>
+</div>
+<div class="comp" style="--accent:#4a9eff">
+<div class="comp-title">Comprehensive Route</div>
+<div class="comp-desc">多量表综合分析</div>
+<div class="comp-badge">分析/用药/CBT/ACT</div>
+</div>
+<div class="comp" style="--accent:#4a9eff">
+<div class="comp-title">Diagnosis Route</div>
+<div class="comp-desc">LangGraph 诊断系统</div>
+<div class="comp-badge">精神科/心理科/服务Agent</div>
+</div>
+<div class="comp" style="--accent:#4a9eff">
+<div class="comp-title">AutoCBT Route</div>
+<div class="comp-desc">AutoCBT 多 Agent 系统</div>
+<div class="comp-badge">POST /api/autocbt</div>
+</div>
+<div class="comp" style="--accent:#4a9eff">
+<div class="comp-title">Faye Route</div>
+<div class="comp-desc">情绪调节助手</div>
+<div class="comp-badge">危机检测/练习推荐</div>
+</div>
+<div class="comp" style="--accent:#4a9eff">
+<div class="comp-title">Headroom Route</div>
+<div class="comp-desc">Token 压缩状态</div>
+<div class="comp-badge">GET /api/headroom</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="arrow-down"></div>
+
+<!-- GRAPH LAYER -->
+<div class="layer layer-graph">
+<div class="layer-label">LANGGRAPH LAYER</div>
+<div class="layer-box">
+<div class="layer-title">LangGraph 多 Agent 系统</div>
+<div class="components">
+<div class="comp" style="--accent:#a78bfa">
+<div class="comp-title">Diagnosis Graph</div>
+<div class="comp-desc">@langchain/langgraph 状态图</div>
+<div class="comp-badge">5 Nodes · 条件路由</div>
+</div>
+<div class="comp" style="--accent:#34d399">
+<div class="comp-title">Psychiatrist Node</div>
+<div class="comp-desc">精神科主任医师 · 8步问诊</div>
+<div class="comp-badge">症状检测 · 量表推荐</div>
+</div>
+<div class="comp" style="--accent:#34d399">
+<div class="comp-title">Psychologist Node</div>
+<div class="comp-desc">心理科主任医师 · 8步评估</div>
+<div class="comp-badge">PsyLLM 支持</div>
+</div>
+<div class="comp" style="--accent:#34d399">
+<div class="comp-title">Service Agent Node</div>
+<div class="comp-desc">专业化服务 Agent</div>
+<div class="comp-badge">儿童/青少年/正念/社交</div>
+</div>
+<div class="comp" style="--accent:#34d399">
+<div class="comp-title">Recommend Scale Node</div>
+<div class="comp-desc">量表推荐 · 查询定义</div>
+</div>
+<div class="comp" style="--accent:#34d399">
+<div class="comp-title">Process Scale Result</div>
+<div class="comp-desc">处理结果 · 反馈医生</div>
+</div>
+<div class="comp" style="--accent:#a78bfa">
+<div class="comp-title">AutoCBT Graph</div>
+<div class="comp-desc">arXiv:2501.09426 多 Agent</div>
+<div class="comp-badge">7 Nodes · 5种路由策略</div>
+</div>
+<div class="comp" style="--accent:#34d399">
+<div class="comp-title">Counsellor Agent (a₀)</div>
+<div class="comp-desc">咨询师 · 生成草稿 · 路由决策</div>
+</div>
+<div class="comp" style="--accent:#f472b6">
+<div class="comp-title">5 Supervisors</div>
+<div class="comp-desc">共情/识别/反思/策略/鼓励</div>
+</div>
+<div class="comp" style="--accent:#34d399">
+<div class="comp-title">Final Reply Node</div>
+<div class="comp-desc">整合建议 · 生成最终回复</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="arrow-down"></div>
+
+<!-- DATA LAYER -->
+<div class="layer layer-data">
+<div class="layer-label">DATA LAYER</div>
+<div class="layer-box">
+<div class="layer-title">数据层</div>
+<div class="components">
+<div class="comp" style="--accent:#f59e0b">
+<div class="comp-title">Questionnaires</div>
+<div class="comp-desc">22个标准化量表定义</div>
+<div class="comp-badge">抑郁6 · 焦虑4 · 睡眠1 · 认知2</div>
+</div>
+<div class="comp" style="--accent:#2dd4bf">
+<div class="comp-title">症状关键词库</div>
+<div class="comp-desc">SYMPTOM_SCALES 映射表</div>
+<div class="comp-badge">自动量表推荐</div>
+</div>
+<div class="comp" style="--accent:#fb923c">
+<div class="comp-title">危机资源</div>
+<div class="comp-desc">中英文危机关键词 · 热线</div>
+<div class="comp-badge">CN:400-161-9995 US:988</div>
+</div>
+<div class="comp" style="--accent:#2dd4bf">
+<div class="comp-title">治疗方案模板</div>
+<div class="comp-desc">CBT/ACT 自助治疗计划</div>
+<div class="comp-badge">6-8周结构化方案</div>
+</div>
+<div class="comp" style="--accent:#fb923c">
+<div class="comp-title">Faye 练习库</div>
+<div class="comp-desc">按情绪分类的循证练习</div>
+<div class="comp-badge">焦虑/悲伤/愤怒/压力</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="arrow-down"></div>
+
+<!-- INFRA LAYER -->
+<div class="layer layer-infra">
+<div class="layer-label">INFRASTRUCTURE</div>
+<div class="layer-box">
+<div class="layer-title">基础设施层</div>
+<div class="components">
+<div class="comp" style="--accent:#94a3b8">
+<div class="comp-title">LLM Layer</div>
+<div class="comp-desc">统一 LLM 调用封装</div>
+<div class="comp-badge">agnes-2.0-flash · 流式</div>
+</div>
+<div class="comp" style="--accent:#94a3b8">
+<div class="comp-title">Headroom Proxy</div>
+<div class="comp-desc">Token 压缩代理</div>
+<div class="comp-badge">压缩率 ~50%</div>
+</div>
+<div class="comp" style="--accent:#94a3b8">
+<div class="comp-title">本地截断</div>
+<div class="comp-desc">LLM 连接失败降级</div>
+<div class="comp-badge">保留最近6条消息</div>
+</div>
+<div class="comp" style="--accent:#94a3b8">
+<div class="comp-title">Model Fallback</div>
+<div class="comp-desc">模型后备链 · 指数退避</div>
+</div>
+<div class="comp" style="--accent:#94a3b8">
+<div class="comp-title">PsyLLM Adapter</div>
+<div class="comp-desc">心理科专用模型适配</div>
+<div class="comp-badge">PsyLLM-8B/4B/1.7B</div>
+</div>
+<div class="comp" style="--accent:#94a3b8">
+<div class="comp-title">Agnes AI API</div>
+<div class="comp-desc">https://apihub.agnes-ai.com</div>
+<div class="comp-badge">OpenAI 兼容接口</div>
+</div>
+</div>
+</div>
+</div>
+
+</div>
+
+<!-- DETAIL SECTION -->
+<div class="detail-panel">
+<h3>模块详细说明</h3>
+<div class="detail-grid">
+<div class="detail-card">
+<h4>🧠 诊断系统 (Diagnosis Graph)</h4>
+<ul>
+<li>精神科 8 步问诊流程（主诉→风险评估）</li>
+<li>心理科 8 步评估流程（认知/情绪/行为/人格）</li>
+<li>4 种专业化服务 Agent（儿童/青少年/正念/社交）</li>
+<li>自动症状检测 → 量表推荐 → 结果反馈闭环</li>
+<li>支持 PsyLLM 心理科专用模型</li>
+</ul>
+</div>
+<div class="detail-card">
+<h4>🔄 AutoCBT 多 Agent 系统</h4>
+<ul>
+<li>Counsellor Agent (a₀) 生成回复草稿并评估信心</li>
+<li>5 个 Supervisor 分别监督 CBT 五大原则</li>
+<li>5 种路由策略：LOOPBACK/UNICAST/MULTICAST/BROADCAST/ENDCAST</li>
+<li>最大迭代 5 次，信心≥0.8 自动结束</li>
+<li>基于论文 AutoCBT (arXiv:2501.09426)</li>
+</ul>
+</div>
+<div class="detail-card">
+<h4>📋 量表系统 (22 Scales)</h4>
+<ul>
+<li>抑郁筛查：PHQ-9, SDS, BDI, HAMD, GDS, Burns</li>
+<li>焦虑评估：GAD-7, HAMA, STAI</li>
+<li>专项评估：ISI失眠, CDC认知扭曲, MoCA/MMSE认知</li>
+<li>专项人群：CERS/SDQ儿童, PSCI/YAPA青少年</li>
+<li>正念/社交：MAAS/FFMQ, SIAS/SAD</li>
+</ul>
+</div>
+<div class="detail-card">
+<h4>💬 Faye 情绪调节系统</h4>
+<ul>
+<li>5 步流程：Identify → Explore → Reframe → Regulate → Reflect</li>
+<li>危机关键词检测（中英文）</li>
+<li>按情绪推荐循证练习（呼吸/接地/放松等）</li>
+<li>CBT + 正念理论框架</li>
+</ul>
+</div>
+<div class="detail-card">
+<h4>🤖 LLM 基础设施</h4>
+<ul>
+<li>主模型：agnes-2.0-flash via Agnes AI API</li>
+<li>Headroom 压缩代理（token 节省 ~50%）</li>
+<li>本地截断降级（保留最近 6 条消息）</li>
+<li>模型后备链 + 限流指数退避</li>
+<li>PsyLLM 适配器（心理科专用，支持 thinking chain）</li>
+</ul>
+</div>
+<div class="detail-card">
+<h4>📡 API 路由一览</h4>
+<ul>
+<li>POST /api/chat — 流式对话</li>
+<li>POST /api/assess — 量表分析</li>
+<li>POST /api/comprehensive — 多量表综合</li>
+<li>POST /api/diagnosis/*/graph — LangGraph 诊断</li>
+<li>POST /api/autocbt/chat — AutoCBT 对话</li>
+<li>POST /api/faye — Faye 情绪调节</li>
+</ul>
+</div>
+</div>
+</div>
+
+<!-- LEGEND -->
+<div class="legend">
+<div class="legend-item"><span class="legend-dot" style="background:#4a9eff"></span>API 路由</div>
+<div class="legend-item"><span class="legend-dot" style="background:#34d399"></span>Agent / 节点</div>
+<div class="legend-item"><span class="legend-dot" style="background:#f59e0b"></span>数据层</div>
+<div class="legend-item"><span class="legend-dot" style="background:#a78bfa"></span>LangGraph</div>
+<div class="legend-item"><span class="legend-dot" style="background:#2dd4bf"></span>治疗方案</div>
+<div class="legend-item"><span class="legend-dot" style="background:#f472b6"></span>CBT 监督者</div>
+<div class="legend-item"><span class="legend-dot" style="background:#fb923c"></span>情绪调节</div>
+<div class="legend-item"><span class="legend-dot" style="background:#94a3b8"></span>基础设施</div>
+</div>
+
+</body>
+</html>

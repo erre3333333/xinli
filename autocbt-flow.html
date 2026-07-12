@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AutoCBT 多 Agent 系统 · 流程图</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0e17;color:#c8d0e0;font-family:"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;overflow-x:hidden}
+.tabs{display:flex;justify-content:center;gap:4px;padding:20px;background:#0d1220;border-bottom:1px solid #1a2035;position:sticky;top:0;z-index:10}
+.tab{padding:10px 24px;border-radius:6px;cursor:pointer;font-size:13px;color:#667;transition:all .2s;border:1px solid transparent}
+.tab:hover{color:#aab;background:#111827}
+.tab.active{color:#fff;background:#1a2540;border-color:#2a3a5a}
+.tab-content{display:none;padding:40px 20px;max-width:1200px;margin:0 auto}
+.tab-content.active{display:block}
+h1{text-align:center;font-size:20px;color:#fff;margin-bottom:8px;letter-spacing:1px}
+.subtitle{text-align:center;font-size:12px;color:#556;margin-bottom:40px}
+/* ====== STYLE 1: STANDARD FLOWCHART ====== */
+.flowchart{position:relative;padding:20px 0}
+.fc-node{position:relative;margin:0 auto 0;max-width:500px;padding:16px 24px;border-radius:8px;text-align:center;transition:all .3s;cursor:pointer}
+.fc-node:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(0,0,0,.4)}
+.fc-start{background:#1a2540;border:2px solid #3a5a8a;border-radius:24px;color:#7ab}
+.fc-process{background:#15202e;border:2px solid #2a4a5a;border-radius:8px}
+.fc-decision{background:#1a1525;border:2px solid #4a3a6a;border-radius:4px;transform:rotate(0deg);clip-path:polygon(50% 0%,100% 50%,50% 100%,0% 50%);max-width:200px;padding:40px 20px}
+.fc-end{background:#2a1515;border:2px solid #6a3a3a;border-radius:24px;color:#a77}
+.fc-supervisor{background:#1a2020;border:2px solid #3a6a5a;border-radius:8px}
+.fc-label{font-size:13px;font-weight:600;color:#e0e8f0;margin-bottom:4px}
+.fc-desc{font-size:11px;color:#667;line-height:1.4}
+.fc-badge{display:inline-block;font-size:10px;padding:2px 8px;border-radius:10px;margin-top:6px}
+.fc-arrow{display:flex;justify-content:center;margin:8px 0;position:relative;height:32px}
+.fc-arrow::before{content:'';position:absolute;top:0;left:50%;width:2px;height:100%;background:#2a3a5a;transform:translateX(-50%)}
+.fc-arrow::after{content:'';position:absolute;bottom:0;left:50%;width:10px;height:10px;border-right:2px solid #2a3a5a;border-bottom:2px solid #2a3a5a;transform:translateX(-50%) rotate(45deg);background:#0a0e17}
+.fc-arrow-label{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:#0a0e17;padding:2px 8px;border-radius:4px;font-size:10px;color:#889;white-space:nowrap;border:1px solid #1e2a3a}
+.fc-branch{display:flex;justify-content:center;gap:12px;margin:12px 0;position:relative}
+.fc-branch::before{content:'';position:absolute;top:0;left:15%;right:15%;height:2px;background:#2a3a5a}
+.fc-branch::after{content:'';position:absolute;top:0;left:50%;width:2px;height:100%;background:#2a3a5a}
+.fc-branch-item{flex:1;max-width:200px;display:flex;flex-direction:column;align-items:center}
+.fc-branch-item .fc-arrow{height:24px}
+.fc-loop{border:2px dashed #3a4a5a;border-radius:12px;padding:16px;margin:12px 0;background:rgba(20,30,50,.3);position:relative}
+.fc-loop-label{position:absolute;top:-10px;left:16px;background:#0a0e17;padding:0 8px;font-size:10px;color:#556}
+/* ====== STYLE 2: STATE TRANSITION DIAGRAM ====== */
+.std-canvas{position:relative;width:100%;height:700px;border:1px solid #1a2035;border-radius:12px;background:radial-gradient(circle at 50% 50%,#0f1525 0%,#0a0e17 100%);overflow:hidden}
+.std-node{position:absolute;width:140px;height:60px;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:all .3s;border:2px solid transparent}
+.std-node:hover{transform:scale(1.05);z-index:5}
+.std-node .std-title{font-size:12px;font-weight:600;color:#e0e8f0}
+.std-node .std-sub{font-size:10px;color:#667;margin-top:2px}
+.std-edge{position:absolute;height:2px;background:#2a3a5a;transform-origin:0 50%;z-index:1}
+.std-edge-label{position:absolute;font-size:10px;color:#889;background:#0f1525;padding:2px 6px;border-radius:4px;white-space:nowrap}
+.std-self-loop{position:absolute;width:30px;height:30px;border:2px solid #3a4a5a;border-radius:50%;opacity:.5}
+/* ====== STYLE 3: SEQUENCE DIAGRAM ====== */
+.seq-diagram{position:relative;padding:20px 0}
+.seq-lifeline{position:absolute;top:0;bottom:0;width:2px;background:linear-gradient(to bottom,#2a3a5a 0%,#1a2540 100%)}
+.seq-participant{position:absolute;top:0;width:120px;text-align:center;padding:12px 8px;border-radius:8px 8px 0 0;font-size:12px;font-weight:600;color:#e0e8f0}
+.seq-message{position:relative;margin:20px 0;padding:8px 16px;border-radius:6px;background:#111827;border:1px solid #1e2a3a;font-size:11px;color:#aab;line-height:1.5}
+.seq-message::before{content:'';position:absolute;left:-20px;top:50%;width:16px;height:2px;background:#2a3a5a}
+.seq-message::after{content:'>';position:absolute;left:-24px;top:50%;transform:translateY(-50%);color:#2a3a5a;font-size:14px}
+.seq-message.self{margin-left:40px;border-color:#2a4a5a}
+.seq-message.decision{border-color:#4a3a6a;background:rgba(30,25,50,.3)}
+.seq-message.loop{border-color:#3a6a5a;background:rgba(20,40,35,.3)}
+.seq-group{position:relative;border:1px solid #1e2a3a;border-radius:8px;padding:12px;margin:12px 0;background:rgba(15,20,35,.5)}
+.seq-group-title{position:absolute;top:-10px;left:12px;background:#0a0e17;padding:0 8px;font-size:10px;color:#556}
+.seq-alt{display:flex;gap:0;margin:8px 0}
+.seq-alt-item{flex:1;padding:8px 12px;border-radius:4px;font-size:11px;color:#889;border:1px solid #1e2a3a}
+.seq-alt-item:first-child{border-right:none}
+.seq-highlight{animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+/* ====== DETAIL PANEL ====== */
+.detail-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:100;display:none;align-items:center;justify-content:center}
+.detail-overlay.show{display:flex}
+.detail-panel{background:#111827;border:1px solid #1e2a3a;border-radius:12px;padding:24px;max-width:500px;width:90%;max-height:80vh;overflow-y:auto}
+.detail-panel h3{font-size:16px;color:#fff;margin-bottom:12px}
+.detail-panel p{font-size:13px;color:#aab;line-height:1.6;margin-bottom:8px}
+.detail-panel ul{list-style:none;padding:0}
+.detail-panel li{font-size:12px;color:#889;padding:4px 0;padding-left:16px;position:relative}
+.detail-panel li::before{content:'›';position:absolute;left:4px;color:#4a5a6a}
+.detail-close{position:absolute;top:12px;right:12px;background:none;border:none;color:#667;font-size:18px;cursor:pointer}
+.detail-close:hover{color:#fff}
+/* Color classes */
+.c-blue{border-color:#3a5a8a!important}.c-blue .fc-badge{background:#3a5a8a30;color:#7ab}
+.c-green{border-color:#2a6a4a!important}.c-green .fc-badge{background:#2a6a4a30;color:#5c8}
+.c-purple{border-color:#5a3a7a!important}.c-purple .fc-badge{background:#5a3a7a30;color:#a7d}
+.c-orange{border-color:#7a5a2a!important}.c-orange .fc-badge{background:#7a5a2a30;color:#ca6}
+.c-teal{border-color:#2a6a6a!important}.c-teal .fc-badge{background:#2a6a6a30;color:#5cc}
+.c-pink{border-color:#7a3a5a!important}.c-pink .fc-badge{background:#7a3a5a30;color:#d7a}
+.c-red{border-color:#7a3a3a!important}.c-red .fc-badge{background:#7a3a3a30;color:#a77}
+</style>
+</head>
+<body>
+<div class="tabs">
+<div class="tab active" onclick="switchTab(0)">标准流程图</div>
+<div class="tab" onclick="switchTab(1)">状态转换图</div>
+<div class="tab" onclick="switchTab(2)">序列图</div>
+</div>
+
+<!-- ====== TAB 1: STANDARD FLOWCHART ====== -->
+<div class="tab-content active" id="tab-0">
+<h1>AutoCBT 多 Agent 系统 · 标准流程图</h1>
+<p class="subtitle">基于 arXiv:2501.09426 — 点击节点查看详情</p>
+<div class="flowchart">
+
+<!-- START -->
+<div class="fc-node fc-start c-blue" onclick="showDetail('start')">
+<div class="fc-label">START</div>
+<div class="fc-desc">用户输入消息</div>
+</div>
+<div class="fc-arrow"><span class="fc-arrow-label">messages + activeAgent</span></div>
+
+<!-- COUNSELLOR -->
+<div class="fc-node fc-process c-blue" onclick="showDetail('counsellor')">
+<div class="fc-label">Counsellor Agent (a&sub0;)</div>
+<div class="fc-desc">生成回复草稿 · 评估信心 · 决策路由</div>
+<div class="fc-badge" style="background:#3a5a8a30;color:#7ab">JSON 输出: draft + confidence + strategy</div>
+</div>
+<div class="fc-arrow"><span class="fc-arrow-label">路由决策</span></div>
+
+<!-- DECISION: CONFIDENCE -->
+<div class="fc-node fc-decision c-purple" onclick="showDetail('confidence')" style="margin:0 auto 0;padding:30px 20px">
+<div class="fc-label" style="font-size:11px">信心 ≥ 0.8?</div>
+</div>
+<div class="fc-branch">
+<div class="fc-branch-item">
+<div class="fc-arrow"><span class="fc-arrow-label" style="color:#5c8">是 → ENDCAST</span></div>
+</div>
+<div class="fc-branch-item">
+<div class="fc-arrow"><span class="fc-arrow-label" style="color:#a77">否 → 路由策略</span></div>
+</div>
+</div>
+
+<!-- ROUTING STRATEGIES -->
+<div class="fc-loop" style="position:relative">
+<div class="fc-loop-label">5 种路由策略</div>
+<div class="fc-branch" style="flex-wrap:wrap">
+<div class="fc-branch-item" style="min-width:80px">
+<div class="fc-node fc-process c-green" style="width:80px;padding:8px" onclick="showDetail('loopback')">
+<div class="fc-label" style="font-size:10px">LOOPBACK</div>
+<div class="fc-desc" style="font-size:9px">继续对话</div>
+</div>
+</div>
+<div class="fc-branch-item" style="min-width:80px">
+<div class="fc-node fc-process c-teal" style="width:80px;padding:8px" onclick="showDetail('unicast')">
+<div class="fc-label" style="font-size:10px">UNICAST</div>
+<div class="fc-desc" style="font-size:9px">单个监督者</div>
+</div>
+</div>
+<div class="fc-branch-item" style="min-width:80px">
+<div class="fc-node fc-process c-orange" style="width:80px;padding:8px" onclick="showDetail('multicast')">
+<div class="fc-label" style="font-size:10px">MULTICAST</div>
+<div class="fc-desc" style="font-size:9px">多个顺序</div>
+</div>
+</div>
+<div class="fc-branch-item" style="min-width:80px">
+<div class="fc-node fc-process c-pink" style="width:80px;padding:8px" onclick="showDetail('broadcast')">
+<div class="fc-label" style="font-size:10px">BROADCAST</div>
+<div class="fc-desc" style="font-size:9px">全部监督者</div>
+</div>
+</div>
+<div class="fc-branch-item" style="min-width:80px">
+<div class="fc-node fc-process c-red" style="width:80px;padding:8px" onclick="showDetail('endcast')">
+<div class="fc-label" style="font-size:10px">ENDCAST</div>
+<div class="fc-desc" style="font-size:9px">终止通信</div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- SUPERVISORS -->
+<div class="fc-arrow"><span class="fc-arrow-label">监督者反馈</span></div>
+<div class="seq-group" style="border:1px solid #1e2a3a;border-radius:8px;padding:16px;margin:12px 0;background:rgba(20,30,50,.3)">
+<div style="font-size:11px;color:#556;margin-bottom:12px">5 大 CBT 原则监督者</div>
+<div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center">
+<div class="fc-node fc-supervisor c-green" style="width:140px;padding:10px" onclick="showDetail('empathy')">
+<div class="fc-label" style="font-size:11px">Empathy</div>
+<div class="fc-desc" style="font-size:10px">共情验证</div>
+</div>
+<div class="fc-node fc-supervisor c-teal" style="width:140px;padding:10px" onclick="showDetail('identification')">
+<div class="fc-label" style="font-size:11px">Identification</div>
+<div class="fc-desc" style="font-size:10px">认知扭曲识别</div>
+</div>
+<div class="fc-node fc-supervisor c-orange" style="width:140px;padding:10px" onclick="showDetail('reflection')">
+<div class="fc-label" style="font-size:11px">Reflection</div>
+<div class="fc-desc" style="font-size:10px">反思挑战</div>
+</div>
+<div class="fc-node fc-supervisor c-pink" style="width:140px;padding:10px" onclick="showDetail('strategy')">
+<div class="fc-label" style="font-size:11px">Strategy</div>
+<div class="fc-desc" style="font-size:10px">策略提供</div>
+</div>
+<div class="fc-node fc-supervisor c-blue" style="width:140px;padding:10px" onclick="showDetail('encouragement')">
+<div class="fc-label" style="font-size:11px">Encouragement</div>
+<div class="fc-desc" style="font-size:10px">鼓励前瞻</div>
+</div>
+</div>
+</div>
+
+<div class="fc-arrow"><span class="fc-arrow-label">回到 Counsellor 继续路由</span></div>
+
+<!-- LOOP DETECTION -->
+<div class="fc-node fc-process c-purple" style="max-width:400px" onclick="showDetail('loop')">
+<div class="fc-label">循环检测 & 迭代计数</div>
+<div class="fc-desc">visitedSupervisors 重复 → 强制 ENDCAST<br>迭代 ≥ 5 → 强制 ENDCAST</div>
+</div>
+
+<div class="fc-arrow"><span class="fc-arrow-label">整合建议</span></div>
+
+<!-- FINAL REPLY -->
+<div class="fc-node fc-process c-blue" onclick="showDetail('final')">
+<div class="fc-label">Final Reply Node</div>
+<div class="fc-desc">整合所有监督者建议改进初始草稿</div>
+</div>
+<div class="fc-arrow"><span class="fc-arrow-label">最终回复</span></div>
+
+<!-- END -->
+<div class="fc-node fc-end c-red" onclick="showDetail('end')">
+<div class="fc-label">END</div>
+<div class="fc-desc">返回用户</div>
+</div>
+
+</div>
+</div>
+
+<!-- ====== TAB 2: STATE TRANSITION DIAGRAM ====== -->
+<div class="tab-content" id="tab-1">
+<h1>AutoCBT · 状态转换图</h1>
+<p class="subtitle">LangGraph 拓扑 — 节点位置可拖拽</p>
+<div class="std-canvas" id="stdCanvas">
+<!-- Nodes positioned absolutely -->
+<div class="std-node c-blue" style="left:480px;top:20px" onclick="showDetail('start')">
+<div class="std-title">START</div>
+<div class="std-sub">用户输入</div>
+</div>
+<div class="std-node c-blue" style="left:410px;top:120px" onclick="showDetail('counsellor')">
+<div class="std-title">Counsellor</div>
+<div class="std-sub">a&sub0; 生成草稿</div>
+</div>
+<!-- Confidence diamond -->
+<div style="position:absolute;left:465px;top:230px;width:100px;height:60px;background:#1a1525;border:2px solid #5a3a7a;border-radius:4px;transform:rotate(0deg);clip-path:polygon(50% 0%,100% 50%,50% 100%,0% 50%);cursor:pointer" onclick="showDetail('confidence')"></div>
+<div style="position:absolute;left:440px;top:248px;font-size:10px;color:#a7d;z-index:2">信心 ≥ 0.8?</div>
+
+<!-- Supervisors ring -->
+<div class="std-node c-green" style="left:100px;top:280px" onclick="showDetail('empathy')">
+<div class="std-title">Empathy</div>
+<div class="std-sub">共情验证</div>
+</div>
+<div class="std-node c-teal" style="left:260px;top:400px" onclick="showDetail('identification')">
+<div class="std-title">Identification</div>
+<div class="std-sub">认知扭曲</div>
+</div>
+<div class="std-node c-orange" style="left:470px;top:440px" onclick="showDetail('reflection')">
+<div class="std-title">Reflection</div>
+<div class="std-sub">反思挑战</div>
+</div>
+<div class="std-node c-pink" style="left:680px;top:400px" onclick="showDetail('strategy')">
+<div class="std-title">Strategy</div>
+<div class="std-sub">策略提供</div>
+</div>
+<div class="std-node c-blue" style="left:840px;top:280px" onclick="showDetail('encouragement')">
+<div class="std-title">Encouragement</div>
+<div class="std-sub">鼓励前瞻</div>
+</div>
+
+<!-- Final reply -->
+<div class="std-node c-blue" style="left:430px;top:530px" onclick="showDetail('final')">
+<div class="std-title">Final Reply</div>
+<div class="std-sub">整合建议</div>
+</div>
+<div class="std-node c-red" style="left:480px;top:620px" onclick="showDetail('end')">
+<div class="std-title">END</div>
+<div class="std-sub">返回用户</div>
+</div>
+
+<!-- SVG for edges -->
+<svg id="stdSvg" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0"></svg>
+</div>
+</div>
+
+<!-- ====== TAB 3: SEQUENCE DIAGRAM ====== -->
+<div class="tab-content" id="tab-2">
+<h1>AutoCBT · 多 Agent 序列图</h1>
+<p class="subtitle">展示 Agent 间消息传递与协作流程</p>
+<div class="seq-diagram">
+
+<div class="seq-group">
+<div class="seq-group-title">第一轮对话</div>
+
+<div class="seq-message" style="margin-left:160px">
+<strong>用户</strong> → Counsellor: "我最近总是失眠，工作压力很大"
+</div>
+<div class="seq-message self" style="margin-left:160px">
+<strong>[内部]</strong> Counsellor 生成草稿，评估信心 = 0.6
+</div>
+<div class="seq-message decision">
+<strong>路由决策:</strong> UNICAST → supervisor_identification
+</div>
+<div class="seq-message" style="margin-left:160px">
+<strong>Counsellor</strong> → Identification: "评估认知扭曲"
+</div>
+<div class="seq-message self" style="margin-left:160px">
+<strong>[反馈]</strong> Identification: 检测到 catastrophizing + sleep-related anxiety
+</div>
+<div class="seq-message loop">
+<strong>Counsellor</strong> ← Identification: 改进建议 → 更新草稿
+</div>
+</div>
+
+<div class="seq-group">
+<div class="seq-group-title">第二轮路由决策</div>
+<div class="seq-message decision">
+<strong>信心评估:</strong> 0.6 → 仍 < 0.8，继续路由
+</div>
+<div class="seq-message">
+<strong>路由决策:</strong> MULTICAST → [empathy, strategy]
+</div>
+<div class="seq-message self" style="margin-left:160px">
+<strong>Counsellor</strong> → Empathy: "评估共情水平"
+</div>
+<div class="seq-message self" style="margin-left:160px">
+<strong>Counsellor</strong> → Strategy: "评估策略适当性"
+</div>
+<div class="seq-message loop">
+<strong>Counsellor</strong> ← 整合建议: 改进回复草稿
+</div>
+</div>
+
+<div class="seq-group">
+<div class="seq-group-title">第三轮 — 结束</div>
+<div class="seq-message decision">
+<strong>信心评估:</strong> 0.85 ≥ 0.8 → ENDCAST
+</div>
+<div class="seq-message self" style="margin-left:160px">
+<strong>Counsellor</strong> → Final Reply: "整合监督者建议，生成最终回复"
+</div>
+<div class="seq-message" style="margin-left:160px">
+<strong>Final Reply</strong> → 用户: "你的失眠可能与工作压力有关..."
+</div>
+</div>
+
+<div class="seq-group" style="margin-top:20px">
+<div class="seq-group-title">安全机制</div>
+<div class="seq-message decision">
+<strong>迭代计数:</strong> iteration < maxIterations (5)
+</div>
+<div class="seq-message decision">
+<strong>循环检测:</strong> visitedSupervisors 无重复 → 正常
+</div>
+<div class="seq-message loop" style="border-color:#6a3a3a">
+<strong>异常路径:</strong> 若检测到循环或达到最大迭代 → 强制 ENDCAST
+</div>
+</div>
+
+</div>
+</div>
+
+<!-- DETAIL OVERLAY -->
+<div class="detail-overlay" id="detailOverlay" onclick="if(event.target===this)hideDetail()">
+<div class="detail-panel" id="detailPanel" style="position:relative">
+<button class="detail-close" onclick="hideDetail()">✕</button>
+<div id="detailContent"></div>
+</div>
+</div>
+
+<script>
+// ====== TAB SWITCHING ======
+function switchTab(i){
+  document.querySelectorAll('.tab').forEach((t,j)=>t.classList.toggle('active',j===i));
+  document.querySelectorAll('.tab-content').forEach((t,j)=>t.classList.toggle('active',j===i));
+  if(i===1) drawStateEdges();
+}
+
+// ====== DETAIL DATA ======
+const DETAILS = {
+  start: {title:'START — 用户输入',content:'<p>用户通过前端界面输入消息，触发 AutoCBT 流程。</p><ul><li>消息内容: 用户当前的心理困扰</li><li>历史消息: 最近 10 轮对话</li><li>初始信心: 0.5</li><li>迭代计数: 0</li></ul>'},
+  counsellor: {title:'Counsellor Agent (a&sub0;) — 咨询师',content:'<p>整个系统的核心入口，对应论文中的 a&sub0;。</p><ul><li><strong>生成草稿:</strong> 基于用户消息生成初步回复</li><li><strong>评估信心:</strong> 对草稿质量打分 (0-1)</li><li><strong>检测认知扭曲:</strong> 识别 catastrophizing, all-or-nothing, overgeneralization 等</li><li><strong>路由决策:</strong> 决定是否需要监督者帮助及策略类型</li><li><strong>输出格式:</strong> JSON (draft_reply, confidence, routing_strategy, supervisor_types)</li></ul><p style="margin-top:8px;color:#889">信心 &ge; 0.8 可直接 ENDCAST，否则根据路由策略选择监督者。</p>'},
+  confidence: {title:'信心评估决策',content:'<p>Counsellor 生成的草稿质量评估：</p><ul><li>信心 &ge; 0.8 → ENDCAST → Final Reply</li><li>信心 < 0.8 → 执行路由策略</li></ul><p style="margin-top:8px">信心评估基于 CBT 五大原则的覆盖程度。</p>'},
+  loopback: {title:'LOOPBACK — 继续对话',content:'<p>咨询师对自己的草稿满意，不需要监督者帮助。</p><ul><li>直接返回 counsellor 节点</li><li>继续与用户对话</li><li>下一轮重新评估</li></ul>'},
+  unicast: {title:'UNICAST — 单个监督者',content:'<p>选择一个最相关的监督者进行咨询。</p><ul><li>通常选择 empathy（共情）作为第一监督者</li><li>根据用户消息类型决定</li><li>监督者返回改进建议后回到 counsellor</li></ul>'},
+  multicast: {title:'MULTICAST — 多个监督者（顺序）',content:'<p>按顺序调用多个监督者。</p><ul><li>例如: [empathy, identification]</li><li>每个监督者依次处理</li><li>累积改进建议</li></ul>'},
+  broadcast: {title:'BROADCAST — 全部监督者',content:'<p>调用所有 5 个监督者。</p><ul><li>适用于复杂或高不确定性场景</li><li>监督者按顺序处理（非并行）</li><li>获得最全面的改进建议</li></ul>'},
+  endcast: {title:'ENDCAST — 终止通信',content:'<p>终止与监督者的通信，生成最终回复。</p><ul><li>信心 &ge; 0.8 时触发</li><li>达到最大迭代次数时触发</li><li>检测到路由循环时强制触发</li></ul>'},
+  empathy: {title:'Empathy Supervisor — 共情验证',content:'<p>评估回复的共情水平（1-7分）。</p><ul><li>是否正确理解用户意图？</li><li>是否展现理解与同情？</li><li>是否创造安全表达环境？</li><li>输出: score, strengths, weaknesses, suggestions</li></ul>'},
+  identification: {title:'Identification Supervisor — 认知扭曲识别',content:'<p>识别用户陈述中的认知扭曲模式。</p><ul><li>Catastrophizing（灾难化）</li><li>All-or-Nothing（全或无）</li><li>Overgeneralization（过度概括）</li><li>Labeling（贴标签）</li><li>Minimization（最小化）</li><li>输出: distortions_detected, scoring, challenging_questions</li></ul>'},
+  reflection: {title:'Reflection Supervisor — 反思挑战',content:'<p>评估回复是否有效促进用户反思。</p><ul><li>Socratic Questioning（苏格拉底式提问）</li><li>澄清问题、假设探究、证据检验</li><li>视角转换、功能性质疑</li><li>输出: score, suggested_questions</li></ul>'},
+  strategy: {title:'Strategy Supervisor — 策略提供',content:'<p>评估和改进 CBT 策略的实用性。</p><ul><li>Thought Record（思维记录表）</li><li>Behavioral Activation（行为激活）</li><li>Cognitive Restructuring（认知重构）</li><li>输出: strategies_provided, actionable_steps</li></ul>'},
+  encouragement: {title:'Encouragement Supervisor — 鼓励前瞻',content:'<p>评估回复是否充分鼓励用户行动。</p><ul><li>肯定进步、正常化感受</li><li>赋能（emphasize user capability）</li><li>预见障碍、提供应对策略</li><li>输出: empowerment_messages, coping_strategies</li></ul>'},
+  loop: {title:'循环检测 & 迭代控制',content:'<ul><li><strong>最大迭代:</strong> 5 次</li><li><strong>循环检测:</strong> visitedSupervisors 中重复元素 &ge; 3 个时触发</li><li><strong>强制结束:</strong> 达到上限后直接 ENDCAST</li></ul><p style="margin-top:8px">防止无限循环是 AutoCBT 的关键安全机制。</p>'},
+  final: {title:'Final Reply Node — 最终回复',content:'<p>整合所有监督者建议，生成最终回复。</p><ul><li>基于 counsellorDraft + supervisorAdvice</li><li>使用 LLM 生成温暖、真诚的回复</li><li>长度: 100-300 字</li><li>语言: 跟随用户偏好</li></ul>'},
+  end: {title:'END — 返回用户',content:'<p>最终回复通过 API 返回给用户。</p><ul><li>返回内容: finalReply, confidence, cognitiveDistortions, routingLog</li></ul>'}
+};
+
+function showDetail(key){
+  const d = DETAILS[key];
+  if(!d) return;
+  document.getElementById('detailContent').innerHTML = '<h3>'+d.title+'</h3>'+d.content;
+  document.getElementById('detailOverlay').classList.add('show');
+}
+function hideDetail(){document.getElementById('detailOverlay').classList.remove('show')}
+
+// ====== STATE DIAGRAM EDGES ======
+function drawStateEdges(){
+  const svg = document.getElementById('stdSvg');
+  svg.innerHTML = '';
+  const canvas = document.getElementById('stdCanvas');
+  const cr = canvas.getBoundingClientRect();
+  
+  function getCenter(el){
+    const r = el.getBoundingClientRect();
+    return {x: r.left + r.width/2 - cr.left, y: r.top + r.height/2 - cr.top};
+  }
+  
+  const nodes = {
+    start: canvas.querySelector('.std-node[onclick*="start"]'),
+    counsellor: canvas.querySelectorAll('.std-node')[1],
+    empathy: canvas.querySelectorAll('.std-node')[2],
+    identification: canvas.querySelectorAll('.std-node')[3],
+    reflection: canvas.querySelectorAll('.std-node')[4],
+    strategy: canvas.querySelectorAll('.std-node')[5],
+    encouragement: canvas.querySelectorAll('.std-node')[6],
+    final: canvas.querySelectorAll('.std-node')[7],
+    end: canvas.querySelectorAll('.std-node')[8],
+  };
+  
+  const pairs = [
+    ['start','counsellor'],['counsellor','empathy'],['counsellor','identification'],
+    ['counsellor','reflection'],['counsellor','strategy'],['counsellor','encouragement'],
+    ['empathy','counsellor'],['identification','counsellor'],['reflection','counsellor'],
+    ['strategy','counsellor'],['encouragement','counsellor'],
+    ['counsellor','final'],['final','end'],
+  ];
+  
+  for(const [fromKey,toKey] of pairs){
+    const from = nodes[fromKey];
+    const to = nodes[toKey];
+    if(!from||!to) continue;
+    const f = getCenter(from), t = getCenter(to);
+    const line = document.createElementNS('http://www.w3.org/2000/svg','line');
+    line.setAttribute('x1',f.x); line.setAttribute('y1',f.y);
+    line.setAttribute('x2',t.x); line.setAttribute('y2',t.y);
+    line.setAttribute('stroke','#2a3a5a'); line.setAttribute('stroke-width','1.5');
+    line.setAttribute('marker-end','url(#arrowhead)');
+    svg.appendChild(line);
+  }
+  
+  // Arrow marker
+  const defs = document.createElementNS('http://www.w3.org/2000/svg','defs');
+  defs.innerHTML = '<marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#2a3a5a"/></marker>';
+  svg.appendChild(defs);
+}
+
+// Init
+window.addEventListener('resize',()=>{if(document.getElementById('tab-1').classList.contains('active'))drawStateEdges()});
+setTimeout(drawStateEdges,100);
+</script>
+</body>
+</html>

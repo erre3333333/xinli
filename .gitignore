@@ -1,0 +1,14 @@
+.gstack/
+.codegraph/
+.claude/
+.skills/
+.env
+*.db
+node_modules/
+client/dist/
+deploy-push.*
+tunnel-url.txt
+ai-website-cloner/
+ponytail/
+docs/
+

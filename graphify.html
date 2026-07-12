@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>心理健康咨询平台 - 系统知识图谱</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0f1117;color:#e0e0e0;font-family:"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;overflow:hidden}
+#canvas{display:block;cursor:grab}
+#canvas:active{cursor:grabbing}
+#sidebar{position:fixed;top:0;right:-420px;width:400px;height:100vh;background:#1a1d27;border-left:1px solid #2a2d3a;transition:right .3s ease;z-index:100;overflow-y:auto;padding:24px}
+#sidebar.open{right:0}
+#sidebar h2{font-size:18px;margin-bottom:12px;color:#fff}
+#sidebar .close-btn{position:absolute;top:16px;right:16px;background:none;border:none;color:#888;font-size:20px;cursor:pointer}
+#sidebar .close-btn:hover{color:#fff}
+#sidebar .detail-section{margin-bottom:16px}
+#sidebar .detail-section h3{font-size:13px;color:#8899aa;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
+#sidebar .detail-section p{font-size:14px;line-height:1.6;color:#ccc}
+#sidebar .tag{display:inline-block;background:#2a2d3a;padding:2px 8px;border-radius:4px;font-size:11px;margin:2px;color:#aab}
+#legend{position:fixed;bottom:20px;left:20px;background:rgba(26,29,39,.9);border:1px solid #2a2d3a;border-radius:8px;padding:16px;z-index:50;backdrop-filter:blur(8px)}
+#legend h4{font-size:12px;color:#8899aa;margin-bottom:10px;text-transform:uppercase;letter-spacing:1px}
+.legend-item{display:flex;align-items:center;margin-bottom:6px;font-size:13px}
+.legend-dot{width:10px;height:10px;border-radius:50%;margin-right:8px}
+#controls{position:fixed;top:20px;left:20px;z-index:50;display:flex;gap:8px}
+#controls button{background:rgba(26,29,39,.9);border:1px solid #2a2d3a;color:#ccc;padding:8px 14px;border-radius:6px;cursor:pointer;font-size:13px;backdrop-filter:blur(8px)}
+#controls button:hover{background:#2a2d3a;color:#fff}
+#controls button.active{background:#3a3d4a;color:#fff;border-color:#5a5d6a}
+#search{position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:50}
+#search input{background:rgba(26,29,39,.9);border:1px solid #2a2d3a;color:#ccc;padding:10px 20px;border-radius:20px;width:300px;font-size:14px;outline:none;backdrop-filter:blur(8px)}
+#search input::placeholder{color:#666}
+#search input:focus{border-color:#5a5d6a}
+#tooltip{position:fixed;background:rgba(26,29,39,.95);border:1px solid #2a2d3a;padding:8px 12px;border-radius:6px;font-size:12px;pointer-events:none;z-index:200;display:none;max-width:250px;backdrop-filter:blur(8px)}
+#layer-toggles{position:fixed;top:20px;right:20px;z-index:50;display:flex;flex-direction:column;gap:6px}
+#layer-toggles button{background:rgba(26,29,39,.9);border:1px solid #2a2d3a;padding:8px 12px;border-radius:6px;cursor:pointer;font-size:12px;backdrop-filter:blur(8px);text-align:left}
+#layer-toggles button:hover{background:#2a2d3a}
+#layer-toggles button.active{border-color:#5a5d6a}
+#stats{position:fixed;bottom:20px;right:20px;background:rgba(26,29,39,.9);border:1px solid #2a2d3a;border-radius:8px;padding:12px 16px;z-index:50;font-size:12px;color:#8899aa;backdrop-filter:blur(8px)}
+</style>
+</head>
+<body>
+<canvas id="canvas"></canvas>
+<div id="search"><input type="text" placeholder="搜索节点..." id="searchInput"></div>
+<div id="controls">
+<button onclick="resetView()">重置</button>
+<button onclick="togglePhysics()" id="physicsBtn" class="active">物理</button>
+</div>
+<div id="layer-toggles">
+<button class="active" onclick="toggleLayer('system')" id="btn-system">系统架构</button>
+<button class="active" onclick="toggleLayer('graph')" id="btn-graph">LangGraph</button>
+<button class="active" onclick="toggleLayer('domain')" id="btn-domain">领域知识</button>
+</div>
+<div id="legend"><h4>节点类型</h4>
+<div class="legend-item"><span class="legend-dot" style="background:#4a9eff"></span>API 路由</div>
+<div class="legend-item"><span class="legend-dot" style="background:#34d399"></span>Agent / 节点</div>
+<div class="legend-item"><span class="legend-dot" style="background:#f59e0b"></span>数据层</div>
+<div class="legend-item"><span class="legend-dot" style="background:#a78bfa"></span>领域知识</div>
+<div class="legend-item"><span class="legend-dot" style="background:#2dd4bf"></span>治疗方案</div>
+<div class="legend-item"><span class="legend-dot" style="background:#f472b6"></span>CBT 原则</div>
+<div class="legend-item"><span class="legend-dot" style="background:#fb923c"></span>情绪调节</div>
+<div class="legend-item"><span class="legend-dot" style="background:#94a3b8"></span>基础设施</div>
+</div>
+<div id="tooltip"></div>
+<div id="sidebar"><button class="close-btn" onclick="closeSidebar()">X</button><div id="sidebar-content"></div></div>
+<div id="stats"></div>
+<script>
+const DATA = {"nodes": [{"id": 0, "label": "Express Server", "type": "infrastructure", "layer": "system", "desc": "Express.js 后端服务，端口 3001", "details": {"file": "server/src/index.js", "port": "3001", "middleware": "cors, express.json(20mb)"}, "expanded": false, "x": 0, "y": 0, "vx": 0, "vy": 0, "pinned": false}, {"id": 1, "label": "Chat Route", "type": "route", "layer": "system", "desc": "流式对话 & 用药建议", "details": {"path": "/api/chat", "methods": ["POST /chat", "POST /medication"], "stream": true}, "expanded": false, "x": 0, "y": 0, "vx": 0, "vy": 0, "pinned": false}, {"id": 2, "label": "Assess Route", "type": "route", "layer": "system", "desc": "单量表分析报告", "details": {"path": "/api/assess", "methods": ["POST /assess"], "stream": true}, "expanded": false, "x": 0, "y": 0, "vx": 0, "vy": 0, "pinned": false}, {"id": 3, "label": "Comprehensive Route", "type": "route", "layer": "system", "desc": "多量表综合分析", "details": {"path": "/api/comprehensive", "types": ["analysis", "medication", "therapy-cbt", "therapy-act"], "stream": true}, "expanded": false, "x": 0, "y": 0, "vx": 0, "vy": 0, "pinned": false}, {"id": 4, "label": "Diagnosis Route", "type": "route", "layer": "system", "desc": "LangGraph 诊断系统", "details": {"path": "/api/diagnosis", "endpoints": ["/psychiatrist/graph", "/psychologist/graph", "/service/graph", "/scales", "/treatment"]}, "expanded": false, "x": 0, "y": 0, "vx": 0, "vy": 0, "pinned": false}, {"id": 5, "label": "AutoCBT Route", "type": "route", "layer": "system", "desc": "AutoCBT 多 Agent 系统", "details": {"path": "/api/autocbt", "endpoints": ["/chat", "/chat/stream"], "stream": true}, "expanded": false, "x": 0, "y": 0, "vx": 0, "vy": 0, "pinned": false}, {"id": 6, "label": "Faye Route", "type": "route", "layer": "system", "desc": "情绪调节助手", "details": {"path": "/api/faye", "crisisDetection": true, "steps": ["Identify", "Explore", "Reframe", "Regulate", "Reflect"]}, "expanded": false, "x": 0, "y": 0, "vx": 0, "vy": 0, "pinned": false}, {"id": 7, "label": "Headroom Route", "type": "route", "layer": "system", "desc": "Token 压缩状态查询", "details": {"path": "/api/headroom", "endpoints": ["GET /headroom/status"]}, "expanded": false, "x": 0, "y": 0, "vx": 0, "vy": 0, "pinned": false}, {"id": 8, "label": "Vue 3 Client", "type": "infrastructure", "layer": "system", "desc": "Vite + Vue 3 前端应用", "details": {"framework": "Vue 3", "builder": "Vite"}, "expanded": false, "x": 0, "y": 0, "vx": 0, "vy": 0, "pinned": false}, {"id": 9, "label": "Diagnosis Graph", "type": "graph", "layer": "graph", "desc": "@langchain/langgraph 诊断流程", "details": {"framework": "@langchain/langgraph", "nodes": 5}, "expanded": false, "x": 0, "y": 0, "vx": 0, "vy": 0, "pinned": false}, {"id": 10, "label": "Psychiatrist Node", "type": "agent", "layer": "graph", "desc": "精神科主任医师 Agent，8步问诊流程", "details": {"steps": ["主诉", "现病史", "症状筛查", "既往史", "治疗史", "躯体疾病", "家族史", "风险评估"], "turnsPerPhase": 4, "scaleDetection": true}, "expanded": false, "x": 0, "y": 0, "vx": 0, "vy": 0, "pinned": false}, {"id": 11, "label": "Psychologist Node", "type": "agent", "layer": "graph", "desc": "心理科主任医师 Agent，8步心理评估", "details": {"steps": ["主诉与功能影响", "心理社会史", "认知模式", "情绪模式", "行为模式", "人格与应对", "创伤史", "社会功能"], "psyLLM": true}, "expanded": false, "x": 0, "y": 0, "vx": 0, "vy": 0, "pinned": false}, {"id": 12, "label": "Service Agent Node", "type": "agent", "layer": "graph", "desc": "专业化服务 Agent", "details": {"types": ["child-emotion", "adolescent", "mindfulness", "social-anxiety"]}, "expanded": false, "x": 0, "y": 0, "vx": 0, "vy": 0, "pinned": false}, {"id": 13, "label": "Recommend Scale Node", "type": "agent", "layer": "graph", "desc": "量表推荐节点", "details": {"function": "lookup scale by id"}, "expanded": false, "x": 0, "y": 0, "vx": 0, "vy": 0, "pinned": false}, {"id": 14, "label": "Process Scale Result Node", "type": "agent", "layer": "graph", "desc": "处理量表结果并反馈", "details": {"function": "inject result as system message"}, "expanded": false, "x": 0, "y": 0, "vx": 0, "vy": 0, "pinned": false}, {"id": 15, "label": "AutoCBT Graph", "type": "graph", "layer": "graph", "desc": "AutoCBT 多 Agent 系统 (arXiv:2501.09426)", "details": {"paper": "arXiv:2501.09426", "nodes": 7, "routing": ["LOOPBACK", "UNICAST", "MULTICAST", "BROADCAST", "ENDCAST"]}, "expanded": false, "x": 0, "y": 0, "vx": 0, "vy": 0, "pinned": false}, {"id": 16, "label": "Counsellor Agent (a0)", "type": "agent", "layer": "graph", "desc": "咨询师 Agent，用户接口", "details": {"responsibilities": ["generate draft", "assess confidence", "decide routing"]}, "expanded": false, "x": 0, "y": 0, "vx": 0, "vy": 0, "pinned": false}, {"id": 17, "label": "Empathy Supervisor", "type": "agent", "layer": "graph", "desc": "共情验证监督者", "details": {}, "expanded": false, "x": 0, "y": 0, "vx": 0, "vy": 0, "pinned": false}, {"id": 18, "label": "Identification Supervisor", "type": "agent", "layer": "graph", "desc": "认知扭曲识别监督者", "details": {}, "expanded": false, "x": 0, "y": 0, "vx": 0, "vy": 0, "pinned": false}, {"id": 19, "label": "Reflection Supervisor", "type": "agent", "layer": "graph", "desc": "反思挑战监督者", "details": {}, "expanded": false, "x": 0, "y": 0, "vx": 0, "vy": 0, "pinned": false}, {"id": 20, "label": "Strategy Supervisor", "type": "agent", "layer": "graph", "desc": "CBT 策略监督者", "details": {}, "expanded": false, "x": 0, "y": 0, "vx": 0, "vy": 0, "pinned": false}, {"id": 21, "label": "Encouragement Supervisor", "type": "agent", "layer": "graph", "desc": "鼓励前瞻监督者", "details": {}, "expanded": false, "x": 0, "y": 0, "vx": 0, "vy": 0, "pinned": false}, {"id": 22, "label": "Final Reply Node", "type": "agent", "layer": "graph", "desc": "整合监督者建议，生成最终回复", "details": {}, "expanded": false, "x": 0, "y": 0, "vx": 0, "vy": 0, "pinned": false}, {"id": 23, "label": "Questionnaires (22 scales)", "type": "data", "layer": "system", "desc": "量表定义数据库", "details": {"total": 22, "categories": ["depression(6)", "anxiety(4)", "sleep(1)", "cognition(2)", "child(2)", "adolescent(2)", "mindfulness(2)", "social-anxiety(2)", "autonomic(1)", "cognitive(2)"]}, "expanded": false, "x": 0, "y": 0, "vx": 0, "vy": 0, "pinned": false}, {"id": 24, "label": "LLM Layer", "type": "infrastructure", "layer": "system", "desc": "统一 LLM 调用层", "details": {"model": "agnes-2.0-flash", "features": ["headroom compression", "local truncation", "model fallback", "streaming"]}, "expanded": false, "x": 0, "y": 0, "vx": 0, "vy": 0, "pinned": false}, {"id": 25, "label": "PsyLLM Adapter", "type": "infrastructure", "layer": "system", "desc": "心理科专用大模型适配器", "details": {"models": ["PsyLLM-8B", "PsyLLM-4B", "PsyLLM-1.7B"], "features": ["thinking chain", "diagnostic reasoning"]}, "expanded": false, "x": 0, "y": 0, "vx": 0, "vy": 0, "pinned": false}, {"id": 26, "label": "Crisis Resources", "type": "data", "layer": "system", "desc": "危机干预资源", "details": {"hotlines": {"CN": "400-161-9995", "US": "988/911", "UK": "116 123"}}, "expanded": false, "x": 0, "y": 0, "vx": 0, "vy": 0, "pinned": false}, {"id": 27, "label": "抑郁症状", "type": "domain", "layer": "domain", "desc": "抑郁相关症状关键词", "details": {"scales": ["PHQ-9", "SDS", "BDI", "HAMD", "GDS", "Burns-Depression"]}, "expanded": false, "x": 0, "y": 0, "vx": 0, "vy": 0, "pinned": false}, {"id": 28, "label": "焦虑症状", "type": "domain", "layer": "domain", "desc": "焦虑相关症状关键词", "details": {"scales": ["GAD-7", "HAMA", "STAI"]}, "expanded": false, "x": 0, "y": 0, "vx": 0, "vy": 0, "pinned": false}, {"id": 29, "label": "失眠症状", "type": "domain", "layer": "domain", "desc": "睡眠相关症状", "details": {"scales": ["ISI"]}, "expanded": false, "x": 0, "y": 0, "vx": 0, "vy": 0, "pinned": false}, {"id": 30, "label": "认知扭曲", "type": "domain", "layer": "domain", "desc": "认知扭曲相关", "details": {"scales": ["CDC"]}, "expanded": false, "x": 0, "y": 0, "vx": 0, "vy": 0, "pinned": false}, {"id": 31, "label": "儿童情绪问题", "type": "domain", "layer": "domain", "desc": "儿童情绪相关", "details": {"scales": ["CERS", "SDQ-Child"]}, "expanded": false, "x": 0, "y": 0, "vx": 0, "vy": 0, "pinned": false}, {"id": 32, "label": "青少年问题", "type": "domain", "layer": "domain", "desc": "青少年相关", "details": {"scales": ["PSCI", "YAPA"]}, "expanded": false, "x": 0, "y": 0, "vx": 0, "vy": 0, "pinned": false}, {"id": 33, "label": "正念需求", "type": "domain", "layer": "domain", "desc": "正念相关", "details": {"scales": ["MAAS", "FFMQ"]}, "expanded": false, "x": 0, "y": 0, "vx": 0, "vy": 0, "pinned": false}, {"id": 34, "label": "社交焦虑", "type": "domain", "layer": "domain", "desc": "社交焦虑相关", "details": {"scales": ["SIAS", "SAD"]}, "expanded": false, "x": 0, "y": 0, "vx": 0, "vy": 0, "pinned": false}, {"id": 35, "label": "精神科诊断", "type": "domain", "layer": "domain", "desc": "ICD-11 诊断编码和名称", "details": {"elements": ["主诉", "诊断印象", "严重程度", "风险等级", "药物治疗建议"]}, "expanded": false, "x": 0, "y": 0, "vx": 0, "vy": 0, "pinned": false}, {"id": 36, "label": "心理科诊断", "type": "domain", "layer": "domain", "desc": "心理动力学理解、认知行为分析", "details": {"elements": ["心理动力学", "认知行为分析", "心理问题", "社会功能评估", "心理治疗建议"]}, "expanded": false, "x": 0, "y": 0, "vx": 0, "vy": 0, "pinned": false}, {"id": 37, "label": "综合治疗方案", "type": "domain", "layer": "domain", "desc": "整合两位医生诊断", "details": {"sections": ["综合诊断结论", "药物治疗方案", "心理治疗方案", "每周治疗计划表", "自我管理指南"]}, "expanded": false, "x": 0, "y": 0, "vx": 0, "vy": 0, "pinned": false}, {"id": 38, "label": "共情验证", "type": "cbt", "layer": "domain", "desc": "展现对用户情绪的理解和同情", "details": {}, "expanded": false, "x": 0, "y": 0, "vx": 0, "vy": 0, "pinned": false}, {"id": 39, "label": "认知扭曲识别", "type": "cbt", "layer": "domain", "desc": "识别灾难化、全或无、过度概括等", "details": {}, "expanded": false, "x": 0, "y": 0, "vx": 0, "vy": 0, "pinned": false}, {"id": 40, "label": "反思挑战", "type": "cbt", "layer": "domain", "desc": "苏格拉底式提问", "details": {}, "expanded": false, "x": 0, "y": 0, "vx": 0, "vy": 0, "pinned": false}, {"id": 41, "label": "策略提供", "type": "cbt", "layer": "domain", "desc": "思维记录表、行为激活、暴露疗法等", "details": {}, "expanded": false, "x": 0, "y": 0, "vx": 0, "vy": 0, "pinned": false}, {"id": 42, "label": "鼓励前瞻", "type": "cbt", "layer": "domain", "desc": "肯定进步、正常化感受、赋能", "details": {}, "expanded": false, "x": 0, "y": 0, "vx": 0, "vy": 0, "pinned": false}, {"id": 43, "label": "1. 识别 (Identify)", "type": "faye", "layer": "domain", "desc": "命名情绪、询问强度", "details": {}, "expanded": false, "x": 0, "y": 0, "vx": 0, "vy": 0, "pinned": false}, {"id": 44, "label": "2. 探索 (Explore)", "type": "faye", "layer": "domain", "desc": "探索触发因素和自动思维", "details": {}, "expanded": false, "x": 0, "y": 0, "vx": 0, "vy": 0, "pinned": false}, {"id": 45, "label": "3. 重构 (Reframe)", "type": "faye", "layer": "domain", "desc": "识别非理性思维、苏格拉底式提问", "details": {}, "expanded": false, "x": 0, "y": 0, "vx": 0, "vy": 0, "pinned": false}, {"id": 46, "label": "4. 调节 (Regulate)", "type": "faye", "layer": "domain", "desc": "呼吸练习、接地技巧、认知重构", "details": {}, "expanded": false, "x": 0, "y": 0, "vx": 0, "vy": 0, "pinned": false}, {"id": 47, "label": "5. 反思 (Reflect)", "type": "faye", "layer": "domain", "desc": "回顾收获、识别模式变化", "details": {}, "expanded": false, "x": 0, "y": 0, "vx": 0, "vy": 0, "pinned": false}, {"id": 48, "label": "焦虑练习", "type": "faye", "layer": "domain", "desc": "4-7-8呼吸、5-4-3-2-1接地、箱式呼吸", "details": {}, "expanded": false, "x": 0, "y": 0, "vx": 0, "vy": 0, "pinned": false}, {"id": 49, "label": "悲伤练习", "type": "faye", "layer": "domain", "desc": "行为激活、自我慈悲冥想、感恩记录", "details": {}, "expanded": false, "x": 0, "y": 0, "vx": 0, "vy": 0, "pinned": false}, {"id": 50, "label": "愤怒练习", "type": "faye", "layer": "domain", "desc": "渐进式肌肉放松、STOP技巧、冷却时间", "details": {}, "expanded": false, "x": 0, "y": 0, "vx": 0, "vy": 0, "pinned": false}, {"id": 51, "label": "压力练习", "type": "faye", "layer": "domain", "desc": "正念身体扫描、优先级矩阵、迷你休息", "details": {}, "expanded": false, "x": 0, "y": 0, "vx": 0, "vy": 0, "pinned": false}, {"id": 52, "label": "药物治疗", "type": "domain", "layer": "domain", "desc": "药物类别、起始剂量、调整方案", "details": {}, "expanded": false, "x": 0, "y": 0, "vx": 0, "vy": 0, "pinned": false}, {"id": 53, "label": "心理治疗", "type": "domain", "layer": "domain", "desc": "CBT、ACT、整合取向", "details": {}, "expanded": false, "x": 0, "y": 0, "vx": 0, "vy": 0, "pinned": false}, {"id": 54, "label": "CBT 自助治疗", "type": "domain", "layer": "domain", "desc": "6-8周计划，思维记录表、行为激活", "details": {}, "expanded": false, "x": 0, "y": 0, "vx": 0, "vy": 0, "pinned": false}, {"id": 55, "label": "ACT 自助治疗", "type": "domain", "layer": "domain", "desc": "6大核心过程：正念、解离、价值澄清", "details": {}, "expanded": false, "x": 0, "y": 0, "vx": 0, "vy": 0, "pinned": false}], "edges": [[0, 1, "mounts"], [0, 2, "mounts"], [0, 3, "mounts"], [0, 4, "mounts"], [0, 5, "mounts"], [0, 6, "mounts"], [0, 7, "mounts"], [8, 1, "calls"], [8, 2, "calls"], [8, 3, "calls"], [8, 4, "calls"], [8, 5, "calls"], [8, 6, "calls"], [4, 9, "uses"], [9, 10, "has node"], [9, 11, "has node"], [9, 12, "has node"], [9, 13, "has node"], [9, 14, "has node"], [10, 13, "may recommend"], [11, 13, "may recommend"], [12, 13, "may recommend"], [13, 8, "sends data"], [14, 9, "feeds back"], [5, 15, "uses"], [15, 16, "has node"], [15, 17, "has node"], [15, 18, "has node"], [15, 19, "has node"], [15, 20, "has node"], [15, 21, "has node"], [15, 22, "has node"], [16, 17, "route to empathy"], [16, 18, "route to identification"], [16, 19, "route to reflection"], [16, 20, "route to strategy"], [16, 21, "route to encouragement"], [17, 16, "returns advice"], [18, 16, "returns advice"], [19, 16, "returns advice"], [20, 16, "returns advice"], [21, 16, "returns advice"], [16, 22, "ENDCAST"], [24, 10, "called by"], [24, 11, "called by"], [24, 16, "called by"], [24, 6, "called by"], [24, 3, "called by"], [24, 2, "called by"], [25, 11, "alternative for"], [23, 13, "serves"], [23, 14, "serves"], [23, 2, "serves"], [23, 3, "serves"], [27, 23, "maps to"], [28, 23, "maps to"], [29, 23, "maps to"], [30, 23, "maps to"], [31, 23, "maps to"], [32, 23, "maps to"], [33, 23, "maps to"], [34, 23, "maps to"], [10, 35, "produces"], [11, 36, "produces"], [14, 35, "informs"], [14, 36, "informs"], [35, 37, "combines into"], [36, 37, "combines into"], [38, 17, "monitored by"], [39, 18, "monitored by"], [40, 19, "monitored by"], [41, 20, "monitored by"], [42, 21, "monitored by"], [16, 38, "embodies"], [16, 39, "embodies"], [16, 40, "embodies"], [16, 41, "embodies"], [16, 42, "embodies"], [43, 44, "flows to"], [44, 45, "flows to"], [45, 46, "flows to"], [46, 47, "flows to"], [6, 43, "implements"], [46, 48, "recommends"], [46, 49, "recommends"], [46, 50, "recommends"], [46, 51, "recommends"], [37, 52, "includes"], [37, 53, "includes"], [3, 54, "generates"], [3, 55, "generates"]]};
+
+const NODES = DATA.nodes;
+const EDGES = DATA.edges;
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+let W, H;
+let camera = { x: 0, y: 0, zoom: 0.7 };
+let dragging = null;
+let panning = false;
+let panStart = { x: 0, y: 0 };
+let hoveredNode = null;
+let selectedNode = null;
+let physicsEnabled = true;
+let layers = { system: true, graph: true, domain: true };
+let searchTerm = '';
+
+const COLORS = {
+  route: '#4a9eff', agent: '#34d399', data: '#f59e0b',
+  domain: '#a78bfa', cbt: '#f472b6', faye: '#fb923c',
+  infrastructure: '#94a3b8', graph: '#60a5fa',
+};
+const NODE_SIZE = 36;
+
+function initPositions() {
+  const cx = W / 2;
+  const cy = H / 2;
+  const layerGroups = { system: [], graph: [], domain: [] };
+  NODES.forEach((n, i) => layerGroups[n.layer].push(i));
+  let offsetY = -150;
+  for (const [layer, indices] of Object.entries(layerGroups)) {
+    indices.forEach((nid, i) => {
+      const angle = (i / indices.length) * Math.PI * 2 - Math.PI / 2;
+      const r = layer === 'system' ? 280 : layer === 'graph' ? 220 : 260;
+      NODES[nid].x = cx + Math.cos(angle) * r;
+      NODES[nid].y = cy + offsetY + Math.sin(angle) * r * 0.6;
+      NODES[nid].vx = 0;
+      NODES[nid].vy = 0;
+    });
+    offsetY += 180;
+  }
+}
+
+function resize() {
+  W = canvas.width = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+}
+
+function screenToWorld(sx, sy) {
+  return {
+    x: (sx - W / 2) / camera.zoom + camera.x,
+    y: (sy - H / 2) / camera.zoom + camera.y,
+  };
+}
+
+function worldToScreen(wx, wy) {
+  return {
+    x: (wx - camera.x) * camera.zoom + W / 2,
+    y: (wy - camera.y) * camera.zoom + H / 2,
+  };
+}
+
+function getNodeAt(wx, wy) {
+  for (let i = NODES.length - 1; i >= 0; i--) {
+    const n = NODES[i];
+    if (!layers[n.layer]) continue;
+    const dx = wx - n.x;
+    const dy = wy - n.y;
+    if (dx * dx + dy * dy < NODE_SIZE * NODE_SIZE) return n;
+  }
+  return null;
+}
+
+function simulate() {
+  if (!physicsEnabled) return;
+  const alpha = 0.3;
+  for (let i = 0; i < NODES.length; i++) {
+    if (!layers[NODES[i].layer]) continue;
+    for (let j = i + 1; j < NODES.length; j++) {
+      if (!layers[NODES[j].layer]) continue;
+      let dx = NODES[i].x - NODES[j].x;
+      let dy = NODES[i].y - NODES[j].y;
+      let dist = Math.sqrt(dx * dx + dy * dy) || 1;
+      let force = 8000 / (dist * dist);
+      if (!NODES[i].pinned) { NODES[i].vx += (dx / dist) * force * alpha; NODES[i].vy += (dy / dist) * force * alpha; }
+      if (!NODES[j].pinned) { NODES[j].vx -= (dx / dist) * force * alpha; NODES[j].vy -= (dy / dist) * force * alpha; }
+    }
+  }
+  for (const [fromId, toId] of EDGES) {
+    const from = NODES[fromId];
+    const to = NODES[toId];
+    if (!layers[from.layer] || !layers[to.layer]) continue;
+    let dx = to.x - from.x;
+    let dy = to.y - from.y;
+    let dist = Math.sqrt(dx * dx + dy * dy) || 1;
+    let force = (dist - 200) * 0.01;
+    if (!from.pinned) { from.vx += (dx / dist) * force * alpha; from.vy += (dy / dist) * force * alpha; }
+    if (!to.pinned) { to.vx -= (dx / dist) * force * alpha; to.vy -= (dy / dist) * force * alpha; }
+  }
+  for (let i = 0; i < NODES.length; i++) {
+    if (!layers[NODES[i].layer] || NODES[i].pinned) continue;
+    NODES[i].vx += (W / 2 - NODES[i].x) * 0.0003;
+    NODES[i].vy += (H / 2 - NODES[i].y) * 0.0003;
+  }
+  for (let i = 0; i < NODES.length; i++) {
+    if (!layers[NODES[i].layer] || NODES[i].pinned) continue;
+    NODES[i].vx *= 0.85;
+    NODES[i].vy *= 0.85;
+    NODES[i].x += NODES[i].vx;
+    NODES[i].y += NODES[i].vy;
+  }
+}
+
+function isConnectedTo(node, other) {
+  if (!other) return true;
+  for (const [fromId, toId] of EDGES) {
+    if (NODES[fromId].id === node.id || NODES[toId].id === node.id) {
+      if (NODES[fromId].id === other.id || NODES[toId].id === other.id) return true;
+    }
+  }
+  return false;
+}
+
+function matchesSearch(node) {
+  if (!searchTerm) return true;
+  return node.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
+         node.desc.toLowerCase().includes(searchTerm.toLowerCase());
+}
+
+function drawEdge(from, to, label) {
+  const s1 = worldToScreen(from.x, from.y);
+  const s2 = worldToScreen(to.x, to.y);
+  const isHighlighted = hoveredNode && (hoveredNode.id === from.id || hoveredNode.id === to.id);
+  const isDimmed = hoveredNode && !isHighlighted;
+  ctx.beginPath();
+  ctx.moveTo(s1.x, s1.y);
+  ctx.lineTo(s2.x, s2.y);
+  ctx.strokeStyle = isDimmed ? 'rgba(100,100,120,0.08)' : isHighlighted ? 'rgba(255,255,255,0.5)' : 'rgba(100,100,120,0.2)';
+  ctx.lineWidth = isHighlighted ? 2 : 1;
+  ctx.stroke();
+  const dx = s2.x - s1.x;
+  const dy = s2.y - s1.y;
+  const len = Math.sqrt(dx * dx + dy * dy);
+  if (len > 0) {
+    const ux = dx / len;
+    const uy = dy / len;
+    const ax = s2.x - ux * NODE_SIZE * camera.zoom;
+    const ay = s2.y - uy * NODE_SIZE * camera.zoom;
+    ctx.beginPath();
+    ctx.moveTo(ax, ay);
+    ctx.lineTo(ax - ux * 10 - uy * 5, ay - uy * 10 + ux * 5);
+    ctx.lineTo(ax - ux * 10 + uy * 5, ay - uy * 10 - ux * 5);
+    ctx.closePath();
+    ctx.fillStyle = isDimmed ? 'rgba(100,100,120,0.08)' : isHighlighted ? 'rgba(255,255,255,0.5)' : 'rgba(100,100,120,0.2)';
+    ctx.fill();
+  }
+  if (camera.zoom > 0.5 && !isDimmed) {
+    const mx = (s1.x + s2.x) / 2;
+    const my = (s1.y + s2.y) / 2;
+    ctx.font = Math.max(9, 11 * camera.zoom) + 'px sans-serif';
+    ctx.fillStyle = 'rgba(150,150,170,0.6)';
+    ctx.textAlign = 'center';
+    ctx.fillText(label, mx, my - 5);
+  }
+}
+
+function drawNode(node) {
+  const s = worldToScreen(node.x, node.y);
+  const r = NODE_SIZE * camera.zoom;
+  const color = COLORS[node.type] || '#888';
+  const isHovered = hoveredNode && hoveredNode.id === node.id;
+  const isSelected = selectedNode && selectedNode.id === node.id;
+  const isDimmed = (hoveredNode || searchTerm) && !isConnectedTo(node, hoveredNode) && !matchesSearch(node);
+  if (isHovered || isSelected) {
+    ctx.beginPath();
+    ctx.arc(s.x, s.y, r + 8, 0, Math.PI * 2);
+    ctx.fillStyle = color + '30';
+    ctx.fill();
+  }
+  ctx.beginPath();
+  ctx.arc(s.x, s.y, r, 0, Math.PI * 2);
+  ctx.fillStyle = isDimmed ? '#1a1d27' : color + '20';
+  ctx.fill();
+  ctx.strokeStyle = isDimmed ? 'rgba(100,100,120,0.15)' : isSelected ? '#fff' : isHovered ? color : color + '80';
+  ctx.lineWidth = isSelected ? 3 : isHovered ? 2 : 1;
+  ctx.stroke();
+  if (camera.zoom > 0.3) {
+    ctx.font = 'bold ' + Math.max(10, 14 * camera.zoom) + 'px sans-serif';
+    ctx.fillStyle = isDimmed ? '#444' : '#fff';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(node.label.charAt(0), s.x, s.y);
+  }
+  if (camera.zoom > 0.4 && !isDimmed) {
+    ctx.font = Math.max(9, 12 * camera.zoom) + 'px sans-serif';
+    ctx.fillStyle = '#ccc';
+    ctx.textAlign = 'center';
+    ctx.fillText(node.label, s.x, s.y + r + 14 * camera.zoom);
+  }
+}
+
+function render() {
+  ctx.clearRect(0, 0, W, H);
+  ctx.strokeStyle = 'rgba(50,50,60,0.3)';
+  ctx.lineWidth = 1;
+  const gridSize = 50 * camera.zoom;
+  const offsetX = (W / 2 - camera.x * camera.zoom) % gridSize;
+  const offsetY = (H / 2 - camera.y * camera.zoom) % gridSize;
+  for (let x = offsetX; x < W; x += gridSize) {
+    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
+  }
+  for (let y = offsetY; y < H; y += gridSize) {
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+  }
+  simulate();
+  for (const [fromId, toId, label] of EDGES) {
+    if (!layers[NODES[fromId].layer] || !layers[NODES[toId].layer]) continue;
+    drawEdge(NODES[fromId], NODES[toId], label);
+  }
+  for (const node of NODES) {
+    if (!layers[node.layer]) continue;
+    drawNode(node);
+  }
+  // Stats
+  const statsEl = document.getElementById('stats');
+  statsEl.textContent = NODES.length + ' 节点 | ' + EDGES.length + ' 边 | 缩放: ' + camera.zoom.toFixed(2) + 'x';
+  requestAnimationFrame(render);
+}
+
+canvas.addEventListener('mousedown', e => {
+  const w = screenToWorld(e.clientX, e.clientY);
+  const node = getNodeAt(w.x, w.y);
+  if (node) {
+    dragging = node;
+    node.pinned = true;
+    selectedNode = node;
+    openSidebar(node);
+  } else {
+    panning = true;
+    panStart = { x: e.clientX, y: e.clientY };
+    selectedNode = null;
+    closeSidebar();
+  }
+});
+
+canvas.addEventListener('mousemove', e => {
+  const w = screenToWorld(e.clientX, e.clientY);
+  const node = getNodeAt(w.x, w.y);
+  hoveredNode = node;
+  canvas.style.cursor = node ? 'pointer' : panning ? 'grabbing' : 'grab';
+  if (dragging) { dragging.x = w.x; dragging.y = w.y; }
+  else if (panning) {
+    camera.x -= (e.clientX - panStart.x) / camera.zoom;
+    camera.y -= (e.clientY - panStart.y) / camera.zoom;
+    panStart = { x: e.clientX, y: e.clientY };
+  }
+  const tooltip = document.getElementById('tooltip');
+  if (node && !selectedNode) {
+    tooltip.style.display = 'block';
+    tooltip.style.left = (e.clientX + 15) + 'px';
+    tooltip.style.top = (e.clientY + 15) + 'px';
+    tooltip.textContent = node.label;
+  } else { tooltip.style.display = 'none'; }
+});
+
+canvas.addEventListener('mouseup', () => {
+  if (dragging) dragging.pinned = false;
+  dragging = null;
+  panning = false;
+});
+
+canvas.addEventListener('wheel', e => {
+  e.preventDefault();
+  const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1;
+  const newZoom = Math.max(0.1, Math.min(5, camera.zoom * zoomFactor));
+  const w = screenToWorld(e.clientX, e.clientY);
+  camera.zoom = newZoom;
+  const w2 = screenToWorld(e.clientX, e.clientY);
+  camera.x -= (w2.x - w.x);
+  camera.y -= (w2.y - w.y);
+}, { passive: false });
+
+function resetView() {
+  camera = { x: W / 2, y: H / 2, zoom: 0.7 };
+  initPositions();
+}
+
+function togglePhysics() {
+  physicsEnabled = !physicsEnabled;
+  document.getElementById('physicsBtn').classList.toggle('active');
+}
+
+function toggleLayer(layer) {
+  layers[layer] = !layers[layer];
+  document.getElementById('btn-' + layer).classList.toggle('active');
+}
+
+function openSidebar(node) {
+  const sidebar = document.getElementById('sidebar');
+  const content = document.getElementById('sidebar-content');
+  const color = COLORS[node.type] || '#888';
+  let html = '<div style="border-left:3px solid ' + color + ';padding-left:12px;margin-bottom:20px">';
+  html += '<h2 style="color:' + color + '">' + node.label + '</h2>';
+  html += '<p style="color:#8899aa;font-size:13px">' + node.desc + '</p></div>';
+  if (node.details && Object.keys(node.details).length > 0) {
+    html += '<div class="detail-section"><h3>详细信息</h3>';
+    for (const [key, val] of Object.entries(node.details)) {
+      if (Array.isArray(val)) {
+        html += '<p><strong>' + key + ':</strong><br>';
+        val.forEach(v => { html += '<span class="tag">' + v + '</span>'; });
+        html += '</p>';
+      } else if (typeof val === 'object') {
+        html += '<p><strong>' + key + ':</strong><br>';
+        for (const [k, v] of Object.entries(val)) {
+          html += '<span class="tag">' + k + ': ' + v + '</span>';
+        }
+        html += '</p>';
+      } else {
+        html += '<p><strong>' + key + ':</strong> ' + val + '</p>';
+      }
+    }
+    html += '</div>';
+  }
+  const connections = EDGES.filter(e => e[0] === node.id || e[1] === node.id);
+  if (connections.length > 0) {
+    html += '<div class="detail-section"><h3>连接 (' + connections.length + ')</h3>';
+    for (const [fromId, toId, label] of connections) {
+      const other = NODES[fromId].id === node.id ? NODES[toId] : NODES[fromId];
+      html += '<p><span class="tag">' + label + '</span> <span class="tag" style="color:' + COLORS[other.type] + '">' + other.label + '</span></p>';
+    }
+    html += '</div>';
+  }
+  content.innerHTML = html;
+  sidebar.classList.add('open');
+}
+
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+}
+
+document.getElementById('searchInput').addEventListener('input', e => {
+  searchTerm = e.target.value;
+});
+
+resize();
+window.addEventListener('resize', () => { resize(); });
+initPositions();
+render();
+</script>
+</body>
+</html>

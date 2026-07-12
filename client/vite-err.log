@@ -1,0 +1,18 @@
+[2m17:52:25[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [2m[console.error] [22m[AutoCBT] 发送消息失败: Error: HTTP error! status: 429
+    at sendMessage (http://localhost:5175/src/components/AutoCBT.vue:52:13)
+[2m18:02:22[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [2m[console.error] [22m[Faye] 发送消息失败: Error: HTTP error! status: 429
+    at sendMessage (http://localhost:5175/src/components/FayeChat.vue:81:13)
+[2m18:02:45[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [2m[console.error] [22m[Faye] 发送消息失败: Error: HTTP error! status: 429
+    at sendMessage (http://localhost:5175/src/components/FayeChat.vue:81:13)
+[2m18:42:42[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [2m[console.error] [22m[Faye] 发送消息失败: Error: HTTP error! status: 429
+    at sendMessage (http://localhost:5175/src/components/FayeChat.vue?t=1783245934358:86:13)
+[2m18:42:50[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [2m[console.error] [22m[Faye] 发送消息失败: Error: HTTP error! status: 429
+    at sendMessage (http://localhost:5175/src/components/FayeChat.vue?t=1783245934358:86:13)
+[2m18:44:49[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [2m[console.error] [22m[Faye] 发送消息失败: Error: HTTP error! status: 429
+    at sendMessage (http://localhost:5175/src/components/FayeChat.vue?t=1783245934358:86:13)
+[2m18:45:20[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [2m[console.error] [22m[AutoCBT] 发送消息失败: Error: HTTP error! status: 429
+    at sendMessage (http://localhost:5175/src/components/AutoCBT.vue:52:13)
+[2m18:45:57[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [2m[console.error] [22m[AutoCBT] 发送消息失败: Error: HTTP error! status: 429
+    at sendMessage (http://localhost:5175/src/components/AutoCBT.vue:52:13)
+[2m18:53:59[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [2m[console.error] [22m[AutoCBT] 发送消息失败: Error: HTTP error! status: 429
+    at sendMessage (http://localhost:5175/src/components/AutoCBT.vue:52:13)

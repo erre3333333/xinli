@@ -1,0 +1,331 @@
+﻿@import "tailwindcss";
+@import "@rysinal/heroui-vue-styles";
+
+:root {
+  /* —— Element Plus Theme Override —— */
+  --el-color-primary: #FB7299;
+  --el-color-primary-light-3: #FC8EB0;
+  --el-color-primary-light-5: #FDB8CF;
+  --el-color-primary-light-7: #FED8E5;
+  --el-color-primary-light-8: #FFE8F0;
+  --el-color-primary-light-9: #FFF2F7;
+  --el-color-primary-dark-2: #D9607A;
+  --el-border-radius-base: 6px;
+  --el-border-radius-small: 4px;
+  --el-border-radius-round: 50px;
+  --el-font-size-base: 14px;
+  --el-font-family: 'Inter', 'Noto Sans SC', -apple-system, 'Helvetica Neue', sans-serif;
+  --el-menu-item-height: 48px;
+  --el-menu-horizontal-sub-item-height: 36px;
+  --el-fill-color-light: #F6F7F8;
+  --el-bg-color: #FFFFFF;
+  --el-text-color-primary: #18191C;
+  --el-text-color-regular: #61666D;
+  --el-text-color-secondary: #9499A0;
+  --el-border-color: #E3E5E7;
+  --el-border-color-light: #F1F2F3;
+  --el-border-color-lighter: #F1F2F3;
+  --el-mask-color: rgba(0, 0, 0, 0.1);
+
+  /* —— Core —— */
+  --canvas: #FFFFFF;
+  --surface: #FFFFFF;
+  --surface-soft: #F6F7F8;
+  --surface-hover: #F1F2F3;
+  --ink: #18191C;
+  --ink-secondary: #61666D;
+  --ink-muted: #9499A0;
+  --hairline: #E3E5E7;
+  --hairline-soft: #F1F2F3;
+  --primary: #FB7299;
+  --on-primary: #FFFFFF;
+
+  /* —— Pastel Color Blocks —— */
+  --block-lime: #DCEEB1;
+  --block-lilac: #C5B0F4;
+  --block-cream: #F4ECD6;
+  --block-mint: #C8E6CD;
+  --block-coral: #F3C9B6;
+  --block-navy: #1F1D3D;
+  --block-pink: #EFD4D4;
+
+  /* —— Accent —— */
+  --accent-magenta: #FF3D8B;
+  --accent-blue: #3B82F6;
+
+  /* —— Semantic —— */
+  --green: #059669;
+  --red: #DC2626;
+  --amber: #D97706;
+  --red-soft: #FEF2F2;
+  --green-soft: #F0FDF4;
+  --amber-soft: #FFFBEB;
+
+  /* —— Patient colors (softened) —— */
+  --c-depression: #FB7299;
+  --c-anxiety: #F5A623;
+  --c-ocd: #F25A5A;
+  --c-bipolar: #9B6BB5;
+  --c-psychosis: #5F9EA0;
+  --c-ptsd: #D98A6A;
+  --c-eating: #E8924A;
+  --c-adhd: #6A8BB5;
+
+  /* —— Warm theme overrides —— */
+  --canvas-warm: #FFF9F5;
+  --surface-warm: #FFFFFF;
+  --ink-warm: #4A3728;
+  --ink-muted-warm: #8B7355;
+  --hairline-warm: rgba(200, 150, 100, 0.12);
+  --shadow-warm: 0 2px 12px rgba(139, 94, 60, 0.06);
+  --shadow-warm-hover: 0 8px 30px rgba(251, 114, 153, 0.12);
+
+  /* —— Type —— */
+  --font-sans: 'Inter', 'Noto Sans SC', -apple-system, 'Helvetica Neue', sans-serif;
+  --font-mono: 'JetBrains Mono', 'SF Mono', ui-monospace, monospace;
+
+  /* —— Radius —— */
+  --r-xs: 4px;
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r-lg: 24px;
+  --r-pill: 50px;
+  --r-full: 9999px;
+
+  /* —— Depth —— */
+  --depth-1: 0 1px 3px rgba(0, 0, 0, 0.04);
+  --depth-2: 0 4px 12px rgba(0, 0, 0, 0.06);
+  --depth-modal: 0 20px 60px rgba(0, 0, 0, 0.15);
+
+  /* —— Motion —— */
+  --ease-out: cubic-bezier(0.25, 0.1, 0.25, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* —— Layout —— */
+  --header-h: 56px;
+  --content-max: 720px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  transition: background 0.35s var(--ease-out);
+}
+
+html,
+body,
+#app {
+  height: 100%;
+}
+
+body {
+  font-family: var(--font-sans);
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.7;
+  color: var(--ink);
+  background: linear-gradient(180deg, #FFF9F5 0%, #FFF5EB 100%);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: color 0.35s var(--ease-out), background 0.35s var(--ease-out);
+}
+
+::selection {
+  background: var(--ink);
+  color: var(--on-primary);
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+  font-size: inherit;
+  color: inherit;
+  transition: color 0.25s var(--ease-out), background 0.25s var(--ease-out), border-color 0.25s var(--ease-out);
+}
+
+input,
+textarea {
+  font-family: inherit;
+  border: none;
+  outline: none;
+  font-size: inherit;
+  color: inherit;
+  background: transparent;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: rgba(200, 150, 100, 0.25);
+  border-radius: var(--r-pill);
+}
+::-webkit-scrollbar-thumb:hover { background: rgba(139, 94, 60, 0.4); }
+
+/* —— Utilities —— */
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--r-pill);
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 1.4;
+  padding: 8px 20px;
+  transition: all 0.2s var(--ease-out);
+}
+
+.pill-primary {
+  background: linear-gradient(135deg, #FB7299, #E85D75);
+  color: var(--on-primary);
+  box-shadow: 0 2px 8px rgba(251, 114, 153, 0.25);
+}
+
+.pill-primary:hover {
+  opacity: 0.9;
+  box-shadow: 0 4px 16px rgba(251, 114, 153, 0.35);
+}
+
+.pill-secondary {
+  background: var(--surface);
+  color: var(--ink);
+  border: 1px solid rgba(200, 150, 100, 0.15);
+}
+
+.pill-secondary:hover {
+  border-color: rgba(139, 94, 60, 0.3);
+  background: #FFF9F5;
+}
+
+/* —— Color Block Sections —— */
+
+.color-block {
+  border-radius: var(--r-lg);
+  padding: 48px 32px;
+}
+
+@media (max-width: 720px) {
+  .color-block {
+    border-radius: 0;
+    padding: 36px 20px;
+  }
+}
+
+/* —— Theme: 春生 Spring —— */
+
+[data-theme="spring"] {
+  --canvas: #FAF9F6;
+  --surface: #FFFFFF;
+  --surface-soft: #F2F5EE;
+  --surface-hover: #EBF0E6;
+  --ink: #1A2E1A;
+  --ink-secondary: #5A6B55;
+  --ink-muted: #9AAB93;
+  --hairline: #DCE4D4;
+  --hairline-soft: #EBF0E6;
+  --primary: #1A2E1A;
+  --on-primary: #FAF9F6;
+  --block-lime: #DCEEB1;
+  --block-lilac: #C5B0F4;
+  --block-cream: #F4ECD6;
+  --block-mint: #C8E6CD;
+  --block-coral: #F3C9B6;
+  --c-depression: #FB7299;
+  --c-anxiety: #F5A623;
+  --c-ocd: #F25A5A;
+  --c-bipolar: #9B6BB5;
+  --c-psychosis: #5F9EA0;
+  --c-ptsd: #D98A6A;
+  --c-eating: #E8924A;
+  --c-adhd: #6A8BB5;
+}
+
+/* —— Theme: 秋暖 Autumn —— */
+
+[data-theme="autumn"] {
+  --canvas: #F5EDE0;
+  --surface: #FAF6F0;
+  --surface-soft: #F0E8DA;
+  --surface-hover: #EBE1D0;
+  --ink: #2E2218;
+  --ink-secondary: #6B5C4E;
+  --ink-muted: #A39484;
+  --hairline: #DDD2C2;
+  --hairline-soft: #EBE1D0;
+  --primary: #6B3A2A;
+  --on-primary: #F5EDE0;
+  --block-lime: #E8DCC4;
+  --block-lilac: #D4C4B0;
+  --block-cream: #F4ECD6;
+  --block-mint: #D8E0C8;
+  --block-coral: #F3D0B6;
+  --c-depression: #7A8B6A;
+  --c-anxiety: #C4904A;
+  --c-ocd: #B85A4A;
+  --c-bipolar: #9B7D8B;
+  --c-psychosis: #6A8A92;
+  --c-ptsd: #8B7A6A;
+  --c-eating: #A08A5A;
+  --c-adhd: #6A7A8B;
+}
+
+/* —— Theme: 月夜 Moon —— */
+
+[data-theme="moon"] {
+  --canvas: #121820;
+  --surface: #1A2235;
+  --surface-soft: #222B40;
+  --surface-hover: #2A3450;
+  --ink: #E8EAF0;
+  --ink-secondary: #A0A8C0;
+  --ink-muted: #5A6280;
+  --hairline: #2E3850;
+  --hairline-soft: #222B40;
+  --primary: #E8EAF0;
+  --on-primary: #121820;
+  --block-lime: #2A3A30;
+  --block-lilac: #3A3050;
+  --block-cream: #3A3530;
+  --block-mint: #2A3A35;
+  --block-coral: #3A2A28;
+  --block-navy: #2E3850;
+  --block-pink: #3A2A30;
+  --c-depression: #7A9B7A;
+  --c-anxiety: #D4A45A;
+  --c-ocd: #CC6A5A;
+  --c-bipolar: #AB8DAB;
+  --c-psychosis: #7A9AA5;
+  --c-ptsd: #8B7A7A;
+  --c-eating: #9A8A6A;
+  --c-adhd: #7A8A9B;
+}
+
+/* —— Animations —— */
+
+@keyframes float-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes typing-pulse {
+  0%, 80%, 100% { transform: scale(0.4); opacity: 0.2; }
+  40% { transform: scale(1); opacity: 1; }
+}

@@ -1,0 +1,9 @@
+﻿{
+    "type":  "message",
+    "content":  "请您用自己的话描述一下目前最困扰您的主要问题或症状是什么？【评估进度: 12%】",
+    "psychiatristSummary":  "",
+    "psychiatristDone":  false,
+    "psychologistSummary":  "",
+    "psychologistDone":  false,
+    "treatmentDone":  false
+}
