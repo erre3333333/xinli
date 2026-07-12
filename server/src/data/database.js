@@ -1,14 +1,19 @@
 import initSqlJs from 'sql.js'
-import { readFileSync, writeFileSync, existsSync } from 'fs'
+import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs'
 import { join, dirname } from 'path'
 import { fileURLToPath } from 'url'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
-const DB_PATH = join(__dirname, 'therapy.db')
+const DATA_DIR = process.env.DATA_DIR || __dirname
+const DB_PATH = join(DATA_DIR, 'therapy.db')
 
 let db = null
 
 export async function initDb() {
+  if (!existsSync(DATA_DIR)) {
+    mkdirSync(DATA_DIR, { recursive: true })
+  }
+
   const SQL = await initSqlJs({
     locateFile: file => join(__dirname, file)
   })
