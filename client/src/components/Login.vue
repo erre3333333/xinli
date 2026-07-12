@@ -5,20 +5,28 @@ import { login, register } from '../utils/api.js'
 const emit = defineEmits(['login-success', 'back'])
 
 const isRegister = ref(false)
-const form = ref({ username: '', password: '', name: '' })
+const form = ref({ username: '', password: '', name: '', plan: 'free' })
 const loading = ref(false)
 const error = ref('')
+
+const plans = [
+  { id: 'free', label: '普通用户', price: '免费', desc: '每日10条消息' },
+  { id: 'monthly', label: '月费用户', price: '20元/月', desc: '无限消息' },
+  { id: 'yearly', label: '年费用户', price: '150元/年', desc: '无限消息，最划算' },
+]
 
 async function submit() {
   error.value = ''
   loading.value = true
   try {
     const fn = isRegister.value ? register : login
-    const res = await fn({
+    const opts = {
       username: form.value.username,
       password: form.value.password,
       name: form.value.name || form.value.username,
-    })
+    }
+    if (isRegister.value) opts.plan = form.value.plan
+    const res = await fn(opts)
     localStorage.setItem('token', res.token)
     localStorage.setItem('user', JSON.stringify(res.user))
     emit('login-success', res.user)
@@ -50,6 +58,22 @@ async function submit() {
         <div v-if="isRegister" class="af-group">
           <label>昵称（选填）</label>
           <input v-model="form.name" placeholder="显示名称" />
+        </div>
+
+        <div v-if="isRegister" class="af-group">
+          <label>用户类型</label>
+          <div class="plan-options">
+            <div
+              v-for="p in plans"
+              :key="p.id"
+              class="plan-option"
+              :class="{ active: form.plan === p.id }"
+              @click="form.plan = p.id"
+            >
+              <span class="po-label">{{ p.label }}</span>
+              <span class="po-price">{{ p.price }}</span>
+            </div>
+          </div>
         </div>
 
         <div v-if="error" class="af-error">{{ error }}</div>
@@ -102,6 +126,24 @@ async function submit() {
 .af-group input:focus {
   border-color: #FB7299; box-shadow: 0 0 0 3px rgba(251, 114, 153, 0.1);
 }
+.plan-options {
+  display: flex; gap: 8px;
+}
+.plan-option {
+  flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px;
+  padding: 10px 8px; border: 1px solid rgba(200, 150, 100, 0.2);
+  border-radius: 10px; cursor: pointer; transition: all 0.2s;
+  background: #FFFFFF; color: #5C4033;
+}
+.plan-option:hover { border-color: #FB7299; }
+.plan-option.active {
+  border-color: #FB7299; background: rgba(251, 114, 153, 0.06);
+  box-shadow: 0 0 0 2px rgba(251, 114, 153, 0.15);
+}
+.po-label { font-size: 13px; font-weight: 500; }
+.po-price { font-size: 11px; color: #8B7355; }
+.plan-option.active .po-price { color: #FB7299; font-weight: 600; }
+
 .af-error { font-size: 13px; color: #E85D75; text-align: center; }
 .af-btn {
   padding: 12px; border: none; border-radius: 10px;

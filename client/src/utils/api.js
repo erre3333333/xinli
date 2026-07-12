@@ -30,10 +30,10 @@ export async function login({ username, password }) {
   return res.json()
 }
 
-export async function register({ username, password, name }) {
+export async function register({ username, password, name, plan }) {
   const res = await api('/api/auth/register', {
     method: 'POST',
-    body: JSON.stringify({ username, password, name }),
+    body: JSON.stringify({ username, password, name, plan }),
   })
   return res.json()
 }

@@ -28,7 +28,7 @@ function run(sql, params = []) {
 
 router.post('/auth/register', async (req, res) => {
   try {
-    const { username, password, name } = req.body
+    const { username, password, name, plan } = req.body
     if (!username || !password) {
       return res.status(400).json({ error: '用户名和密码不能为空' })
     }
@@ -41,10 +41,11 @@ router.post('/auth/register', async (req, res) => {
       return res.status(409).json({ error: '用户名已存在' })
     }
 
+    const selectedPlan = ['monthly', 'yearly'].includes(plan) ? plan : 'free'
     const hash = await bcrypt.hash(password, 10)
-    run('INSERT INTO users (username, password_hash, name) VALUES (?, ?, ?)', [username, hash, name || username])
+    run('INSERT INTO users (username, password_hash, name, plan) VALUES (?, ?, ?, ?)', [username, hash, name || username, selectedPlan])
 
-    const user = queryOne('SELECT id, username, name, avatar, created_at FROM users WHERE username = ?', [username])
+    const user = queryOne('SELECT id, username, name, avatar, plan, created_at FROM users WHERE username = ?', [username])
     const token = generateToken(user)
     res.json({ token, user })
   } catch (e) {
