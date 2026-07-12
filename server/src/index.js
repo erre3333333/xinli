@@ -40,7 +40,7 @@ app.use('/api/faye', createPlanLimit('faye'), fayeRouter)
 
 // Production: serve built frontend
 if (process.env.NODE_ENV === 'production') {
-  const distDir = path.resolve(process.cwd(), '../client/dist')
+  const distDir = path.resolve(process.cwd(), 'public')
   app.use(express.static(distDir))
   app.get('*', (req, res) => {
     if (!req.path.startsWith('/api'))

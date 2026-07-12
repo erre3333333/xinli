@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "start": "node src/index.js",
-    "build": "cd ../client && npm install && npm run build",
+    "build": "cd ../client && npm install && npm run build && cd ../server && rm -rf public && cp -r ../client/dist public",
     "dev": "node --watch src/index.js"
   },
   "dependencies": {
