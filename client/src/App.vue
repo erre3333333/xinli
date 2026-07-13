@@ -317,16 +317,11 @@ watch(
         :class="{ on: currentView === 'conditions' || currentView === 'chat' }"
         @click="() => { showLogin = false; startNewChat() }"
       >首页 · 咨询服务</button>
-          <button
-            class="bh-tab"
-            :class="{ on: currentView === 'autocbt' }"
-            @click="() => { showLogin = false; currentView = 'autocbt' }"
-          >AutoCBT</button>
-          <button
-            class="bh-tab"
-            :class="{ on: currentView === 'faye' }"
-            @click="() => { showLogin = false; currentView = 'faye' }"
-          >Faye</button>
+      <button
+        class="bh-tab"
+        :class="{ on: currentView === 'diagnosis' }"
+        @click="() => { showLogin = false; currentView = 'diagnosis' }"
+      >AI 问诊</button>
           <button
             class="bh-tab"
             :class="{ on: currentView === 'dashboard' }"
@@ -337,11 +332,16 @@ watch(
         :class="{ on: currentView === 'comprehensive' }"
         @click="() => { showLogin = false; currentView = 'comprehensive' }"
       >综合报告</button>
-      <button
-        class="bh-tab"
-        :class="{ on: currentView === 'diagnosis' }"
-        @click="() => { showLogin = false; currentView = 'diagnosis' }"
-      >AI 问诊</button>
+          <button
+            class="bh-tab"
+            :class="{ on: currentView === 'autocbt' }"
+            @click="() => { showLogin = false; currentView = 'autocbt' }"
+          >AutoCBT</button>
+          <button
+            class="bh-tab"
+            :class="{ on: currentView === 'faye' }"
+            @click="() => { showLogin = false; currentView = 'faye' }"
+          >Faye</button>
         </div>
         <div class="bh-right">
           <UsageBar ref="usageBarRef" @upgrade-click="goToPlans" />
@@ -378,19 +378,11 @@ watch(
             </button>
             <button
               class="md-item"
-              :class="{ on: currentView === 'autocbt' }"
-              @click="navigateMobile('autocbt')"
+              :class="{ on: currentView === 'diagnosis' }"
+              @click="navigateMobile('diagnosis')"
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-              <span>AutoCBT</span>
-            </button>
-            <button
-              class="md-item"
-              :class="{ on: currentView === 'faye' }"
-              @click="navigateMobile('faye')"
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-              <span>Faye 情绪调节</span>
+              <span>AI 问诊</span>
             </button>
             <button
               class="md-item"
@@ -410,11 +402,19 @@ watch(
             </button>
             <button
               class="md-item"
-              :class="{ on: currentView === 'diagnosis' }"
-              @click="navigateMobile('diagnosis')"
+              :class="{ on: currentView === 'autocbt' }"
+              @click="navigateMobile('autocbt')"
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-              <span>AI 问诊</span>
+              <span>AutoCBT</span>
+            </button>
+            <button
+              class="md-item"
+              :class="{ on: currentView === 'faye' }"
+              @click="navigateMobile('faye')"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+              <span>Faye 情绪调节</span>
             </button>
           </div>
           <div class="md-footer">

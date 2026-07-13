@@ -6,13 +6,6 @@ defineProps({
 })
 const emit = defineEmits(['select', 'back'])
 
-const featured = [
-  { id: 'depression', label: '抑郁症', desc: '一对一深度对话，协助你探索情绪模式、缓解焦虑与压力', color: '#FB7299', tag: '个体咨询' },
-  { id: 'anxiety', label: '焦虑症', desc: '学习与焦虑共处的方法，重建内在平静与安全感的专业指导', color: '#F5A623', tag: '个体咨询' },
-  { id: 'ocd', label: '强迫症', desc: '专业认知行为疗法，帮助你识别和改变强迫思维与行为模式', color: '#F25A5A', tag: '个体咨询' },
-  { id: 'ptsd', label: '创伤后应激', desc: '在安全的空间中处理创伤经历，一步步重建对生活的掌控感', color: '#D98A6A', tag: '个体咨询' },
-]
-
 const scrollY = ref(0)
 onMounted(() => {
   const el = document.querySelector('.cl-body')
@@ -45,30 +38,6 @@ const icons = {
         <div class="cl-hero-badge">专业心理支持平台</div>
         <h1 class="cl-hero-title">选择适合你的<br/>咨询方向</h1>
         <p class="cl-hero-sub">每一个情绪都值得被温柔以待——选择与你的情况最接近的选项，让我们陪你一起成长。</p>
-      </div>
-    </div>
-
-    <!-- 精选推荐 -->
-    <div class="cl-section">
-      <div class="cl-section-hd">
-        <h3>精选推荐</h3>
-        <span class="cl-section-meta">热门服务</span>
-      </div>
-      <div class="cl-featured">
-        <div
-          v-for="item in featured"
-          :key="item.id"
-          class="cl-card-banner"
-          :style="{ '--accent': item.color }"
-          @click="emit('select', { id: item.id })"
-        >
-          <div class="cl-card-svg" v-html="icons[item.id] || ''"></div>
-          <div class="cl-card-body">
-            <span class="cl-card-tag" :style="{ background: item.color + '20', color: item.color }">{{ item.tag }}</span>
-            <div class="cl-card-title">{{ item.label }}</div>
-            <div class="cl-card-desc">{{ item.desc }}</div>
-          </div>
-        </div>
       </div>
     </div>
 
