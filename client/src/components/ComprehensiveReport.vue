@@ -119,8 +119,7 @@ async function fetchAnalysis() {
       await fetchAnalysis()
       return
     }
-    const m = e.message || String(e)
-    aiError.value = m.includes('|NEED_UPGRADE') ? '该功能仅对付费用户开放' : m
+    aiError.value = e.message || String(e)
   } finally {
     aiLoading.value = false
   }
@@ -162,8 +161,7 @@ async function fetchMedication() {
       await fetchMedication()
       return
     }
-    const m = e.message || String(e)
-    medError.value = m.includes('|NEED_UPGRADE') ? '该功能仅对付费用户开放' : m
+    medError.value = e.message || String(e)
   } finally {
     medLoading.value = false
   }

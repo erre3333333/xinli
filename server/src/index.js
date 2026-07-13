@@ -1,7 +1,8 @@
 import 'dotenv/config'
 import express from 'express'
 import cors from 'cors'
-import path from 'path'
+import path, { dirname, join } from 'path'
+import { fileURLToPath } from 'url'
 import chatRouter from './routes/chat.js'
 import assessRouter from './routes/assess.js'
 import comprehensiveRouter from './routes/comprehensive.js'
@@ -12,10 +13,11 @@ import headroomRouter from './routes/headroom.js'
 import authRouter from './routes/auth.js'
 import recordsRouter from './routes/records.js'
 import plansRouter from './routes/plans.js'
-import { createPlanLimit, planLimit } from './middleware/planLimit.js'
-import { requirePaidPlan } from './middleware/requirePaidPlan.js'
 import { initDb, closeDb } from './data/database.js'
+import { startBackupScheduler, createBackup } from './data/backup.js'
+import { readdirSync, statSync } from 'fs'
 
+const __dirname = dirname(fileURLToPath(import.meta.url))
 const app = express()
 const PORT = process.env.PORT || 3001
 
@@ -30,13 +32,31 @@ app.use('/api', authRouter)
 app.use('/api', plansRouter)
 app.use('/api', headroomRouter)
 app.use('/api', recordsRouter)
+// 备份
+app.get('/api/backup/download', (req, res) => {
+  const b = createBackup()
+  res.download(b.path, b.name)
+})
+app.get('/api/backup/list', (req, res) => {
+  const { DATA_DIR } = process.env
+  const dir = join(DATA_DIR || __dirname, 'backups')
+  const files = []
+  try {
+    for (const f of readdirSync(dir)) {
+      const fp = join(dir, f)
+      const s = statSync(fp)
+      files.push({ name: f, size: s.size, time: s.mtime })
+    }
+  } catch {}
+  res.json(files.sort((a, b) => new Date(b.time) - new Date(a.time)))
+})
 
-app.use('/api', planLimit, chatRouter)
-app.use('/api', requirePaidPlan, assessRouter)
-app.use('/api', requirePaidPlan, comprehensiveRouter)
-app.use('/api', createPlanLimit('diagnosis'), diagnosisRouter)
-app.use('/api/autocbt', createPlanLimit('autocbt'), autocbtRouter)
-app.use('/api/faye', createPlanLimit('faye'), fayeRouter)
+app.use('/api', chatRouter)
+app.use('/api', assessRouter)
+app.use('/api', comprehensiveRouter)
+app.use('/api', diagnosisRouter)
+app.use('/api/autocbt', autocbtRouter)
+app.use('/api/faye', fayeRouter)
 
 // Production: serve built frontend
 if (process.env.NODE_ENV === 'production') {
@@ -53,7 +73,10 @@ initDb().then(async () => {
   const { getDb, saveDb } = await import('./data/database.js')
   const db = getDb()
   try {
-    const adminExists = db.prepare('SELECT id FROM users WHERE username = ?').get('admin')
+    const adminStmt = db.prepare('SELECT id FROM users WHERE username = ?')
+    adminStmt.bind(['admin'])
+    const adminExists = adminStmt.step() ? adminStmt.getAsObject() : null
+    adminStmt.free()
     if (!adminExists) {
       const hash = await bcrypt.hash('19781102', 10)
       db.run('INSERT INTO users (username, password_hash, name, plan) VALUES (?, ?, ?, ?)', ['admin', hash, '管理员', 'yearly'])
@@ -63,6 +86,7 @@ initDb().then(async () => {
   } catch (e) {
     console.error('创建管理员失败:', e.message)
   }
+  startBackupScheduler()
   app.listen(PORT, () => {
     console.log(`心理咨询服务器已启动: http://localhost:${PORT}`)
   })

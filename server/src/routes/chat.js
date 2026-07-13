@@ -1,5 +1,4 @@
 import { Router } from 'express'
-import { requirePaidPlan } from '../middleware/requirePaidPlan.js'
 
 const router = Router()
 const AGNES_API_KEY = process.env.AGNES_API_KEY
@@ -106,7 +105,7 @@ router.post('/chat', async (req, res) => {
   }
 })
 
-router.post('/medication', requirePaidPlan, async (req, res) => {
+router.post('/medication', async (req, res) => {
   const { testName, testSubtitle, patientType, totalScore, maxScore, severity, severityLabel, conditionLabel, answers, model, dimensionScores } = req.body
 
   if (!testName || !patientType) {
