@@ -15,6 +15,7 @@ import recordsRouter from './routes/records.js'
 import plansRouter from './routes/plans.js'
 import { initDb, closeDb } from './data/database.js'
 import { startBackupScheduler, createBackup } from './data/backup.js'
+import { emailBackup } from './data/backupMailer.js'
 import { readdirSync, statSync } from 'fs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
@@ -49,6 +50,16 @@ app.get('/api/backup/list', (req, res) => {
     }
   } catch {}
   res.json(files.sort((a, b) => new Date(b.time) - new Date(a.time)))
+})
+// 备份邮件（供 Railway Cron 调用）
+app.post('/api/backup/email', async (req, res) => {
+  try {
+    const result = await emailBackup()
+    if (result.error) return res.status(400).json(result)
+    res.json(result)
+  } catch (e) {
+    res.status(500).json({ error: e.message })
+  }
 })
 
 app.use('/api', chatRouter)
