@@ -434,19 +434,6 @@ watch(
         </div>
       </div>
     </Transition>
-    <div class="bili-subnav" v-if="currentView !== 'chat'">
-      <button
-        class="bs-tab"
-        :class="{ on: currentView === 'dashboard' }"
-        @click="() => { showLogin = false; currentView = 'dashboard' }"
-      >心理量表</button>
-      <button
-        class="bs-tab"
-        :class="{ on: currentView === 'comprehensive' }"
-        @click="() => { showLogin = false; currentView = 'comprehensive' }"
-      >综合报告</button>
-    </div>
-
     <main class="app-main">
       <template v-if="showLogin">
         <Login
@@ -767,40 +754,6 @@ watch(
   transition: all 0.2s;
 }
 .bh-login-btn:hover { opacity: 0.9; box-shadow: 0 2px 8px rgba(251, 114, 153, 0.3); }
-
-/* Subnav — Warm Theme */
-.bili-subnav {
-  background: linear-gradient(135deg, #FFF9F5 0%, #FFF0E6 100%);
-  border-bottom: 1px solid rgba(200, 150, 100, 0.12);
-  display: flex;
-  gap: 4px;
-  padding: 0 24px;
-  height: 44px;
-  align-items: center;
-  max-width: 1400px;
-  margin: 0 auto;
-  width: 100%;
-}
-.bs-tab {
-  padding: 4px 16px;
-  border-radius: 16px;
-  font-size: 13px;
-  font-weight: 500;
-  color: #8B7355;
-  transition: all 0.2s;
-  border: none;
-  background: transparent;
-  cursor: pointer;
-}
-.bs-tab:hover {
-  color: #6B4E37;
-  background: rgba(251, 114, 153, 0.08);
-}
-.bs-tab.on {
-  color: #FFF5EB;
-  background: linear-gradient(135deg, #FB7299, #E85D75);
-  box-shadow: 0 2px 8px rgba(251, 114, 153, 0.25);
-}
 
 .app-main {
   flex: 1;
@@ -1173,7 +1126,6 @@ watch(
   .bh-hamburger { display: inline-flex; }
   .bili-header-inner { padding: 0 12px; }
   .bh-right { gap: 8px; }
-  .bili-subnav { display: none; }
 }
 
 @media (max-width: 720px) {
