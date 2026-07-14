@@ -28,12 +28,24 @@ function cleanOldBackups() {
   }
 }
 
-export function startBackupScheduler() {
+export async function startBackupScheduler() {
   createBackup()
   console.log('已创建首次数据库备份')
   cleanOldBackups()
-  setInterval(() => {
-    try { createBackup(); cleanOldBackups(); console.log('自动备份完成') }
-    catch (e) { console.error('自动备份失败:', e.message) }
+  // 尝试上传到 GitHub
+  try {
+    const { uploadBackupToGithub } = await import('./backupUploader.js')
+    const r = await uploadBackupToGithub()
+    if (r.success) console.log('已上传备份到 GitHub:', r.url)
+    else if (r.error && !r.error.includes('未配置')) console.warn('GitHub 上传:', r.error)
+  } catch {}
+  setInterval(async () => {
+    try {
+      createBackup()
+      cleanOldBackups()
+      const { uploadBackupToGithub } = await import('./backupUploader.js')
+      const r = await uploadBackupToGithub()
+      if (r.success) console.log('备份完成并上传 GitHub')
+    } catch (e) { console.error('自动备份失败:', e.message) }
   }, 24 * 60 * 60 * 1000)
 }
